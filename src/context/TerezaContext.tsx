@@ -23,6 +23,10 @@ import { getISOWeek, getTodayDateString, calculateIMC } from '@/lib/formatters'
 interface TerezaContextType {
   profile: UserProfile
   updateProfile: (updates: Partial<UserProfile>) => void
+  addTitrationStep: (step: Omit<import('@/types').TitrationStep, 'id'>) => void
+  deleteTitrationStep: (id: string) => void
+  calculateMgFromUnits: (units: number) => number
+  calculateUnitsFromMg: (mg: number) => number
 
   doses: DoseRecord[]
   addDose: (dose: Omit<DoseRecord, 'id' | 'createdAt'>) => void
@@ -244,6 +248,42 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setProfile((prev) => ({ ...prev, ...updates }))
   }
 
+  // Adicionar e remover etapas de titulação
+  const addTitrationStep = (step: Omit<import('@/types').TitrationStep, 'id'>) => {
+    const newStep: import('@/types').TitrationStep = {
+      ...step,
+      id: 'titr-' + Date.now(),
+    }
+    setProfile((prev) => {
+      const plan = prev.titrationPlan || []
+      return {
+        ...prev,
+        titrationPlan: [...plan, newStep].sort((a, b) => (a.date < b.date ? 1 : -1)),
+      }
+    })
+  }
+
+  const deleteTitrationStep = (id: string) => {
+    setProfile((prev) => ({
+      ...prev,
+      titrationPlan: (prev.titrationPlan || []).filter((s) => s.id !== id),
+    }))
+  }
+
+  // Conversão de unidades para mg baseada no perfil
+  const calculateMgFromUnits = (units: number): number => {
+    const mgPer100 = profile.mgPer100Units || 25.0 // padrão 25mg / 100un (0.25 mg/un)
+    const mg = (units / 100) * mgPer100
+    return Math.round(mg * 100) / 100
+  }
+
+  const calculateUnitsFromMg = (mg: number): number => {
+    const mgPer100 = profile.mgPer100Units || 25.0
+    if (mgPer100 <= 0) return 0
+    const units = (mg / mgPer100) * 100
+    return Math.round(units * 2) / 2 // passo 0.5
+  }
+
   // Ações de Doses
   const addDose = (dose: Omit<DoseRecord, 'id' | 'createdAt'>) => {
     const newRecord: DoseRecord = {
@@ -422,16 +462,19 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const nextDoseInfo = useMemo(() => {
     const latestDose = doses[0]
     const intervalDays = reminders.intervalDays || 7
-    const defaultMg = latestDose?.mgDose || 5.0
-    const defaultUnits = latestDose?.units || 20
+    const currentConfigMg = profile.currentPenMg
+    const calculatedDefaultMg = currentConfigMg || (latestDose?.mgDose ?? 5.0)
+    const mgPer100 = profile.mgPer100Units || 25.0
+    const calculatedDefaultUnits = latestDose?.units || (calculatedDefaultMg / mgPer100) * 100
     const reminderTime = reminders.medicationTime || '20:00'
 
     if (!latestDose) {
+      const initMg = profile.currentPenMg || 2.5
       return {
         dateStr: getTodayDateString(),
         timeStr: reminderTime,
-        mgDose: 2.5,
-        units: 10,
+        mgDose: initMg,
+        units: (initMg / mgPer100) * 100,
         isToday: true,
         isPast: false,
       }
@@ -447,12 +490,12 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return {
       dateStr: nextDateStr,
       timeStr: reminderTime,
-      mgDose: defaultMg,
-      units: defaultUnits,
+      mgDose: calculatedDefaultMg,
+      units: calculatedDefaultUnits,
       isToday: nextDateStr === today,
       isPast: nextDateStr < today,
     }
-  }, [doses, reminders])
+  }, [doses, reminders, profile.currentPenMg, profile.mgPer100Units])
 
   // Alerta de água expirado
   const isWaterReminderDue = useMemo(() => {
@@ -567,6 +610,10 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const value: TerezaContextType = {
     profile,
     updateProfile,
+    addTitrationStep,
+    deleteTitrationStep,
+    calculateMgFromUnits,
+    calculateUnitsFromMg,
     doses,
     addDose,
     deleteDose,

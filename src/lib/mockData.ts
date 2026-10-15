@@ -17,6 +17,22 @@ export const DEFAULT_PROFILE: UserProfile = {
   pinkTheme: 'classic',
   waterUnit: 'L',
   weightUnit: 'kg',
+  currentPenMg: 5.0,
+  mgPer100Units: 25.0, // 25 mg/ml -> 10 un = 2,5 mg, 20 un = 5,0 mg
+  titrationPlan: [
+    {
+      id: 'titr-1',
+      date: '2025-02-13',
+      targetMg: 2.5,
+      notes: 'Início da titulação com dose adaptativa inicial de 2,5 mg',
+    },
+    {
+      id: 'titr-2',
+      date: '2025-02-27',
+      targetMg: 5.0,
+      notes: 'Progressão para 5,0 mg após 2 semanas com boa tolerância',
+    },
+  ],
 }
 
 // 4 semanas de dados realistas para o usuário ver gráficos e agrupamento semanal funcionando de imediato

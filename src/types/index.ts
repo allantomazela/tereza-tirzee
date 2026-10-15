@@ -1,5 +1,14 @@
 export type PinkTheme = 'classic' | 'peach' | 'lavender'
 
+export type TirzepatidePen = '2.5' | '5' | '7.5' | '10' | '12.5' | '15' | 'custom'
+
+export interface TitrationStep {
+  id: string
+  date: string // YYYY-MM-DD
+  targetMg: number
+  notes?: string
+}
+
 export interface UserProfile {
   name: string
   heightCm: number
@@ -10,6 +19,10 @@ export interface UserProfile {
   pinkTheme: PinkTheme
   waterUnit: 'ml' | 'L'
   weightUnit: 'kg' | 'lb'
+  // Configurações clínicas de titulação e concentração
+  currentPenMg?: number // 2.5, 5, 7.5, 10, 12.5, 15
+  mgPer100Units?: number // mg em 100 unidades (1 ml) - ex: 25mg/ml (10un = 2.5mg)
+  titrationPlan?: TitrationStep[]
 }
 
 export type InjectionSite = 'Braço' | 'Barriga' | 'Coxa'

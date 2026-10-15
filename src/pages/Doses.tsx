@@ -25,7 +25,8 @@ const SITES: { label: InjectionSite; desc: string; icon: string }[] = [
 
 export default function Doses() {
   const navigate = useNavigate()
-  const { addDose, nextDoseInfo } = useTereza()
+  const { addDose, doses, nextDoseInfo, profile, calculateMgFromUnits, calculateUnitsFromMg } =
+    useTereza()
 
   // Estados do formulário de dose
   const [units, setUnits] = useState<number>(nextDoseInfo.units || 20)
@@ -34,6 +35,7 @@ export default function Doses() {
   const [site, setSite] = useState<InjectionSite>('Barriga')
   const [date, setDate] = useState<string>(getTodayDateString())
   const [time, setTime] = useState<string>(getCurrentTimeString())
+  const [notes, setNotes] = useState<string>('')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   // Feedback states
@@ -46,9 +48,8 @@ export default function Doses() {
   const timeInputId = useId()
   const manualInputId = useId()
 
-  // Converte unidades para dose aproximada em mg (ex: frasco 10mg/ml, 0.1ml = 10un = 2.5mg ou escala padrão)
-  // Fórmula padrão clínica: 10 unidades = 2.5 mg, 20 unidades = 5 mg, 30 = 7.5 mg, 40 = 10 mg, 60 = 15 mg
-  const estimatedMg = Math.round(units * 0.25 * 10) / 10
+  // Converte unidades para dose em mg conforme a concentração prescrita
+  const calculatedMg = calculateMgFromUnits(units)
 
   const handleSliderChange = (newVal: number) => {
     setUnits(newVal)
@@ -99,13 +100,14 @@ export default function Doses() {
 
     setIsSubmitting(true)
 
-    // Salva no contexto e localStorage
+    // Salva no contexto e localStorage com unidades e mg calculados
     addDose({
       date,
       time,
       units,
       site,
-      mgDose: estimatedMg,
+      mgDose: calculatedMg,
+      notes: notes.trim() || undefined,
     })
 
     setIsSubmitting(false)
@@ -125,6 +127,7 @@ export default function Doses() {
     setDate(getTodayDateString())
     setTime(getCurrentTimeString())
     setSite('Barriga')
+    setNotes('')
   }
 
   return (
@@ -171,14 +174,17 @@ export default function Doses() {
           </div>
 
           <div className="flex items-center justify-center gap-2">
-            <span className="px-3 py-1 rounded-full bg-[#FCE4EC] text-[#F43F8E] text-xs font-bold">
-              ≈ {formatNumberBr(estimatedMg, 1)} mg de Tirzepatida
+            <span className="px-3.5 py-1.5 rounded-full bg-[#FCE4EC] text-[#F43F8E] text-xs sm:text-sm font-bold shadow-2xs">
+              ≈ {formatNumberBr(calculatedMg, calculatedMg % 1 === 0 ? 0 : 2)} mg de Tirzepatida
+            </span>
+            <span className="text-[11px] text-[#6B7280]">
+              (Concentração: {profile.mgPer100Units || 25} mg / ml)
             </span>
           </div>
         </div>
 
         {/* ILUSTRAÇÃO DA SERINGA (WOW FEATURE) */}
-        <SyringeAnimation units={units} maxUnits={60} />
+        <SyringeAnimation units={units} maxUnits={60} mgEquivalent={calculatedMg} />
 
         {/* CONTROLE DESLIZANTE (SLIDER 0 - 60) */}
         <div className="space-y-4 max-w-xl mx-auto px-2">
@@ -201,23 +207,33 @@ export default function Doses() {
             />
           </div>
 
-          {/* ATALHOS RÁPIDOS DE DOSES CLÍNICAS */}
-          <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
-            {[10, 20, 30, 40, 50, 60].map((val) => (
-              <button
-                key={val}
-                type="button"
-                onClick={() => handleSliderChange(val)}
-                className={cn(
-                  'px-2.5 py-1 rounded-xl text-xs font-semibold transition-all btn-tap-scale',
-                  units === val
-                    ? 'bg-[#F43F8E] text-white shadow-sm'
-                    : 'bg-[#F7F4F6] text-[#6B7280] hover:bg-[#FCE4EC] hover:text-[#F43F8E]',
-                )}
-              >
-                {val} un ({val * 0.25}mg)
-              </button>
-            ))}
+          {/* ATALHOS RÁPIDOS DE DOSES CLÍNICAS (MG + UNIDADES) */}
+          <div className="space-y-1.5 pt-1">
+            <span className="block text-[11px] font-bold text-center text-gray-500 uppercase tracking-wide">
+              Atalhos de dosagem da caneta:
+            </span>
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {[2.5, 5.0, 7.5, 10.0, 12.5, 15.0].map((mgVal) => {
+                const unVal = calculateUnitsFromMg(mgVal)
+                const isSelected = Math.abs(units - unVal) < 0.1
+                return (
+                  <button
+                    key={mgVal}
+                    type="button"
+                    onClick={() => handleSliderChange(unVal)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-xl text-xs font-semibold transition-all btn-tap-scale flex items-center gap-1.5 shadow-2xs',
+                      isSelected
+                        ? 'bg-[#F43F8E] text-white shadow-sm'
+                        : 'bg-[#F7F4F6] text-[#6B7280] hover:bg-[#FCE4EC] hover:text-[#F43F8E]',
+                    )}
+                  >
+                    <span className="font-bold">{mgVal} mg</span>
+                    <span className="text-[10px] opacity-80">({unVal} un)</span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           {/* BOTÃO PARA INSERIR MANUALMENTE */}
@@ -298,39 +314,54 @@ export default function Doses() {
           </div>
         </div>
 
-        {/* DATA E HORA DA APLICAÇÃO */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-          <div className="space-y-1.5">
-            <label
-              htmlFor={dateInputId}
-              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700"
-            >
-              <Calendar className="w-3.5 h-3.5 text-[#F43F8E]" />
-              <span>Data da Aplicação</span>
-            </label>
-            <input
-              id={dateInputId}
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-xs font-medium text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
-            />
+        {/* DATA, HORA E OBSERVAÇÃO */}
+        <div className="space-y-3 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label
+                htmlFor={dateInputId}
+                className="flex items-center gap-1.5 text-xs font-semibold text-gray-700"
+              >
+                <Calendar className="w-3.5 h-3.5 text-[#F43F8E]" />
+                <span>Data da Aplicação</span>
+              </label>
+              <input
+                id={dateInputId}
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-xs font-medium text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                htmlFor={timeInputId}
+                className="flex items-center gap-1.5 text-xs font-semibold text-gray-700"
+              >
+                <Clock className="w-3.5 h-3.5 text-[#F43F8E]" />
+                <span>Horário da Aplicação</span>
+              </label>
+              <input
+                id={timeInputId}
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-xs font-medium text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5">
-            <label
-              htmlFor={timeInputId}
-              className="flex items-center gap-1.5 text-xs font-semibold text-gray-700"
-            >
-              <Clock className="w-3.5 h-3.5 text-[#F43F8E]" />
-              <span>Horário da Aplicação</span>
+            <label className="block text-xs font-semibold text-gray-700">
+              Observações clínicas / sensações da aplicação (opcional):
             </label>
             <input
-              id={timeInputId}
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-xs font-medium text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Ex: Aplicação sem dor, leve vermelhidão local, transição para nova dose..."
+              className="w-full px-3.5 py-2 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-xs font-medium text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
             />
           </div>
         </div>
@@ -352,8 +383,107 @@ export default function Doses() {
           <HelpCircle className="w-4 h-4 text-[#F43F8E] shrink-0 mt-0.5" />
           <p>
             Recomenda-se alternar os locais de injeção a cada semana para evitar lipodistrofia.
-            Mantenha as seringas e o medicamento em temperatura adequada conforme a bula.
+            Mantenha as seringas e o medicamento em temperatura adequada conforme a bula (2°C a 8°C
+            antes do uso).
           </p>
+        </div>
+      </div>
+
+      {/* HISTÓRICO DE TITULAÇÃO E DOSES APLICADAS */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E7EB] shadow-card-soft space-y-6">
+        <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+              <Syringe className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="font-bold text-base text-[#1F1A1D]">Histórico de Doses & Titulação</h2>
+              <p className="text-xs text-gray-500">
+                Acompanhamento da progressão em unidades e miligramas (mg)
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#FCE4EC] text-[#F43F8E]">
+            {doses.length} registro(s)
+          </span>
+        </div>
+
+        {/* Linha do tempo de titulação se houver plano */}
+        {profile.titrationPlan && profile.titrationPlan.length > 0 && (
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-[#FFF5F8] to-[#FCE4EC]/30 border border-[#F9A8C9]/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-[#F43F8E] uppercase tracking-wide">
+                Plano de Titulação Registrado
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate('/perfil')}
+                className="text-[11px] font-semibold text-[#F43F8E] hover:underline"
+              >
+                Gerenciar no Perfil →
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+              {profile.titrationPlan.map((step, idx) => (
+                <div
+                  key={step.id}
+                  className="p-3 rounded-xl bg-white border border-[#F9A8C9]/40 shadow-2xs space-y-1"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-gray-500">Etapa {idx + 1}</span>
+                    <span className="text-xs font-extrabold text-[#F43F8E]">
+                      {step.targetMg} mg
+                    </span>
+                  </div>
+                  <div className="text-[11px] font-semibold text-gray-800">
+                    A partir de{' '}
+                    {getTodayDateString() === step.date
+                      ? 'Hoje'
+                      : step.date.split('-').reverse().join('/')}
+                  </div>
+                  {step.notes && (
+                    <div className="text-[10px] text-gray-500 line-clamp-1">{step.notes}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tabela detalhada de todas as doses */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-[#FCE4EC] text-[#6B7280]">
+                <th className="py-2.5 px-3 font-semibold">Data / Hora</th>
+                <th className="py-2.5 px-3 font-semibold">Dose em mg</th>
+                <th className="py-2.5 px-3 font-semibold">Seringa (U-100)</th>
+                <th className="py-2.5 px-3 font-semibold">Local</th>
+                <th className="py-2.5 px-3 font-semibold">Observações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {doses.map((dose) => (
+                <tr key={dose.id} className="hover:bg-[#F7F4F6] transition-colors">
+                  <td className="py-2.5 px-3 font-medium text-[#1F1A1D]">
+                    <div>{dose.date.split('-').reverse().join('/')}</div>
+                    <div className="text-[10px] text-gray-400">{dose.time}</div>
+                  </td>
+                  <td className="py-2.5 px-3">
+                    <span className="px-2.5 py-1 rounded-full bg-[#FCE4EC] text-[#F43F8E] font-bold text-xs inline-block">
+                      {formatNumberBr(dose.mgDose || calculateMgFromUnits(dose.units), 1)} mg
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-3 font-bold text-gray-800">{dose.units} un</td>
+                  <td className="py-2.5 px-3 text-gray-600 font-medium">{dose.site}</td>
+                  <td className="py-2.5 px-3 text-gray-500 italic max-w-xs truncate">
+                    {dose.notes || '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -374,7 +504,7 @@ export default function Doses() {
                 Aplicação Registrada!
               </h3>
               <p className="text-sm text-[#6B7280]">
-                Dose de <strong className="text-[#F43F8E]">{units} unidades</strong> ({estimatedMg}{' '}
+                Dose de <strong className="text-[#F43F8E]">{units} unidades</strong> ({calculatedMg}{' '}
                 mg) no local <strong className="text-[#1F1A1D]">{site}</strong> gravada com sucesso.
               </p>
             </div>

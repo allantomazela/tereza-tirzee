@@ -12,10 +12,15 @@ import {
   Calendar,
   Clock,
   Trash2,
+  Syringe,
+  Plus,
+  FileText,
 } from 'lucide-react'
 import { useTereza } from '@/context/TerezaContext'
 import { PinkTheme } from '@/types'
 import { cn } from '@/lib/utils'
+import { getTodayDateString } from '@/lib/formatters'
+import MedicalReportModal from '@/components/MedicalReportModal'
 
 const THEME_OPTIONS: { id: PinkTheme; name: string; primary: string; desc: string }[] = [
   { id: 'classic', name: 'Rosa Choque Clássico', primary: '#F43F8E', desc: 'Vibrante e motivador' },
@@ -34,7 +39,15 @@ const DAYS_OF_WEEK = [
 ]
 
 export default function Perfil() {
-  const { profile, updateProfile, reminders, updateReminders, resetAllData } = useTereza()
+  const {
+    profile,
+    updateProfile,
+    addTitrationStep,
+    deleteTitrationStep,
+    reminders,
+    updateReminders,
+    resetAllData,
+  } = useTereza()
 
   // Estados de formulário de Perfil
   const [name, setName] = useState(profile.name)
@@ -45,6 +58,16 @@ export default function Perfil() {
     String(profile.initialWeight).replace('.', ','),
   )
   const [targetWeight, setTargetWeight] = useState(String(profile.targetWeight).replace('.', ','))
+
+  // Estados de Dosagem e Titulação Clínica
+  const [currentPenMg, setCurrentPenMg] = useState<number>(profile.currentPenMg || 5.0)
+  const [mgPer100Units, setMgPer100Units] = useState<string>(
+    String(profile.mgPer100Units || 25).replace('.', ','),
+  )
+  const [newStepMg, setNewStepMg] = useState<number>(5.0)
+  const [newStepDate, setNewStepDate] = useState<string>(getTodayDateString())
+  const [newStepNotes, setNewStepNotes] = useState<string>('')
+  const [showAddStep, setShowAddStep] = useState<boolean>(false)
 
   // Estados de Lembretes
   const [medicationEnabled, setMedicationEnabled] = useState(reminders.medicationEnabled)
@@ -67,6 +90,7 @@ export default function Perfil() {
   // Modais de Reset e Toasts
   const [resetModalStep, setResetModalStep] = useState<0 | 1 | 2>(0)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [showMedicalReportModal, setShowMedicalReportModal] = useState<boolean>(false)
 
   const nameInputId = useId()
   const heightInputId = useId()
@@ -92,6 +116,8 @@ export default function Perfil() {
     const parsedInitW = parseFloat(initialWeight.replace(',', '.'))
     const parsedTargW = parseFloat(targetWeight.replace(',', '.'))
 
+    const parsedMgConc = parseFloat(mgPer100Units.replace(',', '.'))
+
     updateProfile({
       name: name.trim(),
       heightCm: isNaN(parsedHeight) ? 165 : parsedHeight,
@@ -102,9 +128,26 @@ export default function Perfil() {
       pinkTheme: selectedTheme,
       waterUnit,
       weightUnit,
+      currentPenMg,
+      mgPer100Units: isNaN(parsedMgConc) || parsedMgConc <= 0 ? 25 : parsedMgConc,
     })
 
-    triggerToast('Perfil e preferências salvos com sucesso!')
+    triggerToast('Perfil, metas e dosagens salvas com sucesso!')
+  }
+
+  const handleAddTitrationStep = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (newStepMg <= 0) return
+
+    addTitrationStep({
+      targetMg: newStepMg,
+      date: newStepDate,
+      notes: newStepNotes.trim() || undefined,
+    })
+
+    setNewStepNotes('')
+    setShowAddStep(false)
+    triggerToast(`Progressão para ${newStepMg} mg adicionada ao histórico!`)
   }
 
   // Salvar Lembretes
@@ -359,6 +402,197 @@ export default function Perfil() {
         </form>
       </div>
 
+      {/* SEÇÃO NOVA: DOSAGEM, CONCENTRAÇÃO & TITULAÇÃO */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E7EB] shadow-card-soft space-y-6">
+        <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+              <Syringe className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="font-bold text-base text-[#1F1A1D]">
+                Dosagem da Caneta & Plano de Titulação
+              </h2>
+              <p className="text-xs text-gray-500">
+                Mapeamento das unidades da seringa U-100 para mg de acordo com a receita médica
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Escolha da Caneta Prescrita */}
+        <div className="space-y-3">
+          <label className="block text-xs font-bold text-gray-700">
+            Dose Prescrita Atual (Caneta):
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+            {[2.5, 5.0, 7.5, 10.0, 12.5, 15.0].map((mg) => (
+              <button
+                key={mg}
+                type="button"
+                onClick={() => setCurrentPenMg(mg)}
+                className={cn(
+                  'p-3 rounded-2xl border text-center transition-all chip-scale',
+                  currentPenMg === mg
+                    ? 'bg-[#FCE4EC] border-[#F43F8E] text-[#F43F8E] font-bold shadow-2xs'
+                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50',
+                )}
+              >
+                <span className="block text-sm font-black">{mg} mg</span>
+                <span className="text-[10px] opacity-75">Tirzepatida</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Concentração por 100 unidades (1 ml) */}
+        <div className="p-4 rounded-2xl bg-[#F7F4F6] border border-gray-200 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-gray-800 block">
+                Concentração da Formulação (mg por 100 unidades / 1 ml)
+              </span>
+              <span className="text-[11px] text-gray-500">
+                Padrão mais comum: 25 mg/ml (onde 10 unidades da seringa = 2,5 mg)
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                inputMode="decimal"
+                value={mgPer100Units}
+                onChange={(e) => setMgPer100Units(e.target.value)}
+                className="w-20 px-3 py-1.5 text-center text-sm font-bold bg-white rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+              />
+              <span className="text-xs font-bold text-gray-500">mg / ml</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Histórico / Plano de Titulação */}
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-800">
+              Evolução e Histórico de Titulação:
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowAddStep(!showAddStep)}
+              className="text-xs font-bold text-[#F43F8E] hover:underline flex items-center gap-1"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Adicionar etapa</span>
+            </button>
+          </div>
+
+          {showAddStep && (
+            <div className="p-4 rounded-2xl bg-[#FFF5F8] border border-[#F9A8C9]/40 space-y-3 animate-fade-in">
+              <span className="text-xs font-bold text-[#F43F8E] block">
+                Registrar Progressão de Dose
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-gray-700">Dose Alvo (mg):</label>
+                  <select
+                    value={newStepMg}
+                    onChange={(e) => setNewStepMg(parseFloat(e.target.value))}
+                    className="w-full px-3 py-2 text-xs font-bold bg-white rounded-xl border border-gray-300"
+                  >
+                    {[2.5, 5.0, 7.5, 10.0, 12.5, 15.0].map((v) => (
+                      <option key={v} value={v}>
+                        {v} mg
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-gray-700">A partir de:</label>
+                  <input
+                    type="date"
+                    value={newStepDate}
+                    onChange={(e) => setNewStepDate(e.target.value)}
+                    className="w-full px-3 py-2 text-xs font-semibold bg-white rounded-xl border border-gray-300"
+                  ></input>
+                </div>
+
+                <div className="space-y-1 sm:col-span-1">
+                  <label className="text-[11px] font-semibold text-gray-700">
+                    Anotação médica:
+                  </label>
+                  <input
+                    type="text"
+                    value={newStepNotes}
+                    onChange={(e) => setNewStepNotes(e.target.value)}
+                    placeholder="Ex: Subida planejada com médico"
+                    className="w-full px-3 py-2 text-xs bg-white rounded-xl border border-gray-300"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowAddStep(false)}
+                  className="px-3 py-1.5 text-xs text-gray-600 font-semibold"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddTitrationStep}
+                  className="px-4 py-1.5 bg-[#F43F8E] hover:bg-[#D63370] text-white text-xs font-bold rounded-xl shadow-2xs"
+                >
+                  Salvar Etapa
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Lista de etapas */}
+          <div className="space-y-2">
+            {(profile.titrationPlan || []).map((step, idx) => (
+              <div
+                key={step.id}
+                className="flex items-center justify-between p-3 rounded-2xl bg-[#F7F4F6] border border-gray-100 text-xs"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="w-6 h-6 rounded-full bg-[#FCE4EC] text-[#F43F8E] font-bold flex items-center justify-center text-[11px]">
+                    {idx + 1}
+                  </span>
+                  <div>
+                    <span className="font-bold text-[#1F1A1D]">
+                      {step.targetMg} mg — início em {step.date.split('-').reverse().join('/')}
+                    </span>
+                    {step.notes && <p className="text-[11px] text-gray-500">{step.notes}</p>}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => deleteTitrationStep(step.id)}
+                  className="text-gray-400 hover:text-red-500 p-1"
+                  title="Remover etapa"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={handleSaveProfile}
+            className="px-6 py-2.5 bg-[#F43F8E] hover:bg-[#D63370] text-white font-bold text-xs rounded-2xl shadow-md btn-tap-scale transition-all flex items-center gap-2"
+          >
+            <Save className="w-4 h-4" />
+            <span>Salvar Configurações de Dose</span>
+          </button>
+        </div>
+      </div>
+
       {/* SEÇÃO 2: LEMBRETES & NOTIFICAÇÕES INTERNAS */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E7EB] shadow-card-soft space-y-6">
         <div className="flex items-center gap-2.5 pb-2 border-b border-gray-100">
@@ -580,6 +814,35 @@ export default function Perfil() {
         </div>
       </div>
 
+      {/* SEÇÃO 3.5: EXPORTAR RELATÓRIO CLÍNICO */}
+      <div className="bg-gradient-to-r from-white to-[#FCE4EC]/50 rounded-3xl p-6 sm:p-8 border border-[#F9A8C9]/40 shadow-card-soft space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="font-bold text-base text-[#1F1A1D]">
+                Exportar Relatório para Consulta Médica
+              </h2>
+              <p className="text-xs text-gray-500">
+                Gere um documento pronto para imprimir ou salvar em PDF com todas as suas doses,
+                sintomas e pesagens
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowMedicalReportModal(true)}
+            className="px-5 py-2.5 bg-[#F43F8E] hover:bg-[#D63370] text-white font-bold text-xs rounded-2xl shadow-md btn-tap-scale transition-all flex items-center gap-2"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Gerar Relatório Clínico</span>
+          </button>
+        </div>
+      </div>
+
       {/* SEÇÃO 4: ZONA DE PERIGO — RESETAR DADOS */}
       <div className="bg-red-50/50 rounded-3xl p-6 border border-red-200 space-y-3">
         <div className="flex items-center gap-2 text-red-600">
@@ -667,6 +930,12 @@ export default function Perfil() {
           </div>
         </div>
       )}
+
+      {/* MODAL DO RELATÓRIO MÉDICO IMPRIMÍVEL */}
+      <MedicalReportModal
+        isOpen={showMedicalReportModal}
+        onClose={() => setShowMedicalReportModal(false)}
+      />
     </div>
   )
 }

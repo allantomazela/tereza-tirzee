@@ -13,11 +13,13 @@ import {
   ChevronRight,
   Activity,
   HeartPulse,
+  FileText,
 } from 'lucide-react'
 import { useTereza } from '@/context/TerezaContext'
 import { formatNumberBr, formatDateFriendly, formatDateBr, getGreeting } from '@/lib/formatters'
 import CircularProgress from '@/components/CircularProgress'
 import FloatingActionButton from '@/components/FloatingActionButton'
+import MedicalReportModal from '@/components/MedicalReportModal'
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -33,6 +35,7 @@ export default function Dashboard() {
   } = useTereza()
 
   const [showWeekModal, setShowWeekModal] = useState(false)
+  const [showMedicalReportModal, setShowMedicalReportModal] = useState(false)
   const { greeting, subtitle } = getGreeting()
 
   // Percentual de hidratação
@@ -48,17 +51,27 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-7 pb-12">
-      {/* 1. SAUDAÇÃO PERSONALIZADA */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      {/* 1. SAUDAÇÃO PERSONALIZADA & BOTÃO EXPORTAR RELATÓRIO */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1F1A1D]">
             {greeting}, {profile.name?.split(' ')[0] || 'Usuária'} 👋
           </h1>
           <p className="text-sm sm:text-base text-[#6B7280] mt-0.5">{subtitle}</p>
         </div>
-        <div className="hidden sm:flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-[#E5E7EB] text-xs text-[#6B7280] shadow-xs">
-          <Calendar className="w-3.5 h-3.5 text-[#F43F8E]" />
-          <span>{formatDateFriendly(new Date().toISOString().split('T')[0])}</span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowMedicalReportModal(true)}
+            className="px-4 py-2 bg-white hover:bg-[#FCE4EC] text-[#F43F8E] font-bold text-xs rounded-2xl border border-[#F9A8C9] shadow-xs transition-all flex items-center gap-2 btn-tap-scale"
+          >
+            <FileText className="w-4 h-4 text-[#F43F8E]" />
+            <span>Exportar Relatório Médico</span>
+          </button>
+          <div className="hidden lg:flex items-center gap-2 bg-white px-3.5 py-2 rounded-2xl border border-[#E5E7EB] text-xs text-[#6B7280] shadow-xs">
+            <Calendar className="w-3.5 h-3.5 text-[#F43F8E]" />
+            <span>{formatDateFriendly(new Date().toISOString().split('T')[0])}</span>
+          </div>
         </div>
       </div>
 
@@ -453,7 +466,13 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* 6. BOTÃO FLUTUANTE RADIAL */}
+      {/* 6. MODAL DO RELATÓRIO MÉDICO IMPRIMÍVEL */}
+      <MedicalReportModal
+        isOpen={showMedicalReportModal}
+        onClose={() => setShowMedicalReportModal(false)}
+      />
+
+      {/* 7. BOTÃO FLUTUANTE RADIAL */}
       <FloatingActionButton />
     </div>
   )
