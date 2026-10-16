@@ -83,8 +83,15 @@ export default function SyringeAnimation({
   const pistonHeight = 28
   const pistonBottomY = pistonTopY + pistonHeight
 
-  // Haste do êmbolo e apoio de polegar
-  const rodLength = 175
+  // Haste do êmbolo física e apoio de polegar (Thumb Rest):
+  // Em uma seringa real, o pistão, a haste e o disco de apoio do polegar formam uma peça rígida só.
+  // O comprimento total do êmbolo rígido (da base do pistão de borracha até a base do disco)
+  // permite que, em 0 UI (pistão no zero = y=190, base = y=218), a haste percorra todo o cilindro até a flange
+  // dos dedos (y=600) e deixe uma pontinha (haste + flange de apoio para o polegar) visível para fora
+  // para a pega dos dedos (feedback do usuário: "ficando uma ponta para fora para ter a pega pelos dedos para puxar").
+  // Conforme a dose é puxada (slider aumenta), o êmbolo desce proporcionalmente e a haste se estende
+  // cada vez mais para fora do corpo da seringa abaixo da flange dos dedos!
+  const rodLength = 412 // Comprimento da haste rígida: em 0 UI, thumbBaseY = 630 (ponta de apoio logo abaixo da flange de dedos)
   const thumbBaseY = pistonBottomY + rodLength
 
   // Gerador das marcas da escala fiel à foto:
@@ -156,7 +163,7 @@ export default function SyringeAnimation({
         {/* ÁREA CENTRAL DO DESENHO DA SERINGA */}
         <div className="relative w-full flex items-center justify-center py-2 sm:py-4">
           <svg
-            viewBox="0 0 460 760"
+            viewBox="0 0 460 1120"
             className="w-full max-w-[380px] sm:max-w-[420px] h-auto drop-shadow-md overflow-visible"
             role="img"
             aria-label={`Seringa de insulina 0,5 ml 50 UI agulha fixa com ${safeUnits} unidades puxadas`}
@@ -337,7 +344,7 @@ export default function SyringeAnimation({
                 opacity="0.8"
               />
               {/* Nervuras transversais da haste plástica */}
-              {[40, 85, 130].map((offset) => {
+              {[40, 85, 130, 175, 220, 265, 310, 355, 390].map((offset) => {
                 const ribY = pistonBottomY + offset
                 if (ribY >= thumbBaseY - 10) return null
                 return (
@@ -369,47 +376,57 @@ export default function SyringeAnimation({
                   stroke="#9A3412"
                   strokeWidth="0.8"
                 />
-                {/* Flange / disco largo de apoio do polegar em laranja vibrante */}
+                {/* Flange / disco largo de apoio do polegar em laranja vibrante (pegada com os dedos para puxar) */}
                 <rect
-                  x={barrelCenterX - 28}
+                  x={barrelCenterX - 34}
                   y={thumbBaseY}
-                  width="56"
-                  height="16"
-                  rx="5"
+                  width="68"
+                  height="18"
+                  rx="6"
                   fill="url(#orangeThumbRestGrad)"
                   stroke="#9A3412"
-                  strokeWidth="1.2"
+                  strokeWidth="1.4"
                 />
                 {/* Linha de brilho superior no disco laranja */}
                 <rect
-                  x={barrelCenterX - 24}
-                  y={thumbBaseY + 2}
-                  width="48"
-                  height="3"
+                  x={barrelCenterX - 30}
+                  y={thumbBaseY + 2.5}
+                  width="60"
+                  height="3.5"
                   rx="1.5"
                   fill="#FFA62B"
-                  opacity="0.8"
+                  opacity="0.85"
                 />
                 {/* Borda inferior arredondada com sombra */}
                 <line
-                  x1={barrelCenterX - 26}
-                  y1={thumbBaseY + 14}
-                  x2={barrelCenterX + 26}
-                  y2={thumbBaseY + 14}
+                  x1={barrelCenterX - 31}
+                  y1={thumbBaseY + 15}
+                  x2={barrelCenterX + 31}
+                  y2={thumbBaseY + 15}
                   stroke="#7C2D12"
-                  strokeWidth="1.2"
+                  strokeWidth="1.4"
                 />
-                {/* Nervuras antiderrapantes para o polegar */}
+                {/* Nervuras antiderrapantes para o polegar / dedos */}
                 <line
-                  x1={barrelCenterX - 18}
-                  y1={thumbBaseY + 8}
-                  x2={barrelCenterX + 18}
-                  y2={thumbBaseY + 8}
+                  x1={barrelCenterX - 22}
+                  y1={thumbBaseY + 7.5}
+                  x2={barrelCenterX + 22}
+                  y2={thumbBaseY + 7.5}
                   stroke="#FFFFFF"
-                  strokeWidth="1.2"
+                  strokeWidth="1.3"
                   strokeLinecap="round"
-                  opacity="0.75"
+                  opacity="0.8"
                 />
+                <line
+                  x1={barrelCenterX - 16}
+                  y1={thumbBaseY + 11.5}
+                  x2={barrelCenterX + 16}
+                  y2={thumbBaseY + 11.5}
+                  stroke="#FFA62B"
+                  strokeWidth="1.1"
+                  strokeLinecap="round"
+                  opacity="0.7"
+                />{' '}
               </g>
 
               {/* PISTÃO DE VEDAÇÃO LARANJA VIBRANTE DENTRO DO CILINDRO */}
@@ -840,12 +857,23 @@ export default function SyringeAnimation({
                 stroke="#94A3B8"
                 strokeWidth="1"
               />
-              {/* Flange oval plana larga da foto */}
+              {/* Abertura central do cilindro (orifício por onde a haste do êmbolo desliza para fora) */}
               <ellipse
                 cx={barrelCenterX}
                 cy={barrelBottomY + 8}
-                rx="70"
-                ry="9"
+                rx="15"
+                ry="5"
+                fill="#E2E8F0"
+                stroke="#94A3B8"
+                strokeWidth="1"
+              />
+              {/* Flange oval plana larga da foto com recorte/transparência elegante */}
+              <path
+                d={`M ${barrelCenterX - 70} ${barrelBottomY + 8}
+                    C ${barrelCenterX - 70} ${barrelBottomY + 2}, ${barrelCenterX - 35} ${barrelBottomY}, ${barrelCenterX} ${barrelBottomY}
+                    C ${barrelCenterX + 35} ${barrelBottomY}, ${barrelCenterX + 70} ${barrelBottomY + 2}, ${barrelCenterX + 70} ${barrelBottomY + 8}
+                    C ${barrelCenterX + 70} ${barrelBottomY + 14}, ${barrelCenterX + 35} ${barrelBottomY + 16}, ${barrelCenterX} ${barrelBottomY + 16}
+                    C ${barrelCenterX - 35} ${barrelBottomY + 16}, ${barrelCenterX - 70} ${barrelBottomY + 14}, ${barrelCenterX - 70} ${barrelBottomY + 8} Z`}
                 fill="url(#fingerFlangeGrad)"
                 stroke="#94A3B8"
                 strokeWidth="1.6"
@@ -856,11 +884,20 @@ export default function SyringeAnimation({
                 rx="64"
                 ry="6.5"
                 fill="#FFFFFF"
-                fillOpacity="0.6"
+                fillOpacity="0.5"
               />
               {/* Brilhos plásticos na flange */}
               <line
                 x1={barrelCenterX - 55}
+                y1={barrelBottomY + 7}
+                x2={barrelCenterX - 18}
+                y2={barrelBottomY + 7}
+                stroke="#FFFFFF"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              <line
+                x1={barrelCenterX + 18}
                 y1={barrelBottomY + 7}
                 x2={barrelCenterX + 55}
                 y2={barrelBottomY + 7}
