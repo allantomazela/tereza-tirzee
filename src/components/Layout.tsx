@@ -143,7 +143,7 @@ export default function Layout() {
                 <div>
                   <h4 className="font-semibold text-sm">Hora da sua dose hoje!</h4>
                   <p className="text-xs text-white/90">
-                    Sua aplicação de {nextDoseInfo.mgDose} mg ({nextDoseInfo.units} unidades) está
+                    Sua aplicação de {nextDoseInfo.mgDose} mg ({nextDoseInfo.units} UI) está
                     programada para hoje.
                   </p>
                 </div>

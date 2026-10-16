@@ -21,7 +21,8 @@ export interface UserProfile {
   weightUnit: 'kg' | 'lb'
   // Configurações clínicas de titulação e concentração
   currentPenMg?: number // 2.5, 5, 7.5, 10, 12.5, 15
-  mgPer100Units?: number // mg em 100 unidades (1 ml) - ex: 25mg/ml (10un = 2.5mg)
+  customConcentrationMgMl?: number // Se o usuário definir concentração personalizada
+  mgPer100Units?: number // mg em 100 unidades (1 ml) - legado/compatibilidade
   titrationPlan?: TitrationStep[]
 }
 

@@ -242,7 +242,8 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
             <div>
               <span className="text-gray-500 block">Dose prescrita atual:</span>
               <strong className="text-[#F43F8E]">
-                {profile.currentPenMg || 5} mg ({profile.mgPer100Units || 25} mg/ml)
+                Caneta {profile.currentPenMg || 15} mg (
+                {profile.customConcentrationMgMl || (profile.currentPenMg || 15) / 0.5} mg/ml)
               </strong>
             </div>
           </div>

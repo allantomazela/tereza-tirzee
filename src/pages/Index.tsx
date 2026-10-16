@@ -89,7 +89,8 @@ export default function Dashboard() {
                 Próxima Dose
               </span>
               <span className="px-2.5 py-0.5 rounded-full bg-white text-[#F43F8E] text-xs font-bold shadow-xs">
-                {nextDoseInfo.mgDose} mg • {nextDoseInfo.units} unidades
+                {nextDoseInfo.mgDose} mg • {nextDoseInfo.units} UI (
+                {formatNumberBr(nextDoseInfo.units / 100, 2)} ml)
               </span>
             </div>
 
@@ -293,7 +294,8 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <div className="text-xs font-bold text-[#1F1A1D]">
-                        {dose.units} unidades {dose.mgDose ? `(${dose.mgDose} mg)` : ''}
+                        {dose.units} UI {dose.mgDose ? `(${dose.mgDose} mg)` : ''} •{' '}
+                        {formatNumberBr(dose.units / 100, 2)} ml
                       </div>
                       <div className="text-[11px] text-[#6B7280]">
                         Local: <span className="font-medium text-[#1F1A1D]">{dose.site}</span>

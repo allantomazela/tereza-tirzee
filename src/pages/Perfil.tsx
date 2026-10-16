@@ -60,9 +60,12 @@ export default function Perfil() {
   const [targetWeight, setTargetWeight] = useState(String(profile.targetWeight).replace('.', ','))
 
   // Estados de Dosagem e Titulação Clínica
-  const [currentPenMg, setCurrentPenMg] = useState<number>(profile.currentPenMg || 5.0)
-  const [mgPer100Units, setMgPer100Units] = useState<string>(
-    String(profile.mgPer100Units || 25).replace('.', ','),
+  const [currentPenMg, setCurrentPenMg] = useState<number>(profile.currentPenMg || 15.0)
+  const [useCustomConc, setUseCustomConc] = useState<boolean>(!!profile.customConcentrationMgMl)
+  const [customConcValue, setCustomConcValue] = useState<string>(
+    profile.customConcentrationMgMl
+      ? String(profile.customConcentrationMgMl).replace('.', ',')
+      : String((profile.currentPenMg || 15.0) / 0.5).replace('.', ','),
   )
   const [newStepMg, setNewStepMg] = useState<number>(5.0)
   const [newStepDate, setNewStepDate] = useState<string>(getTodayDateString())
@@ -116,7 +119,13 @@ export default function Perfil() {
     const parsedInitW = parseFloat(initialWeight.replace(',', '.'))
     const parsedTargW = parseFloat(targetWeight.replace(',', '.'))
 
-    const parsedMgConc = parseFloat(mgPer100Units.replace(',', '.'))
+    const parsedCustomConc = useCustomConc
+      ? parseFloat(customConcValue.replace(',', '.'))
+      : undefined
+    const effectiveConc =
+      useCustomConc && parsedCustomConc && parsedCustomConc > 0
+        ? parsedCustomConc
+        : currentPenMg / 0.5
 
     updateProfile({
       name: name.trim(),
@@ -129,7 +138,9 @@ export default function Perfil() {
       waterUnit,
       weightUnit,
       currentPenMg,
-      mgPer100Units: isNaN(parsedMgConc) || parsedMgConc <= 0 ? 25 : parsedMgConc,
+      customConcentrationMgMl:
+        useCustomConc && parsedCustomConc && parsedCustomConc > 0 ? parsedCustomConc : undefined,
+      mgPer100Units: effectiveConc,
     })
 
     triggerToast('Perfil, metas e dosagens salvas com sucesso!')
@@ -445,27 +456,61 @@ export default function Perfil() {
           </div>
         </div>
 
-        {/* Concentração por 100 unidades (1 ml) */}
+        {/* Concentração calculada a partir da caneta de 0,5 ml */}
         <div className="p-4 rounded-2xl bg-[#F7F4F6] border border-gray-200 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <span className="text-xs font-bold text-gray-800 block">
-                Concentração da Formulação (mg por 100 unidades / 1 ml)
+                Cálculo de Concentração da Caneta (em 0,5 ml)
               </span>
               <span className="text-[11px] text-gray-500">
-                Padrão mais comum: 25 mg/ml (onde 10 unidades da seringa = 2,5 mg)
+                Caneta de <strong>{currentPenMg} mg</strong> em 0,5 ml ={' '}
+                <strong className="text-[#F43F8E]">
+                  {(currentPenMg / 0.5).toFixed(1).replace('.0', '')} mg/ml
+                </strong>{' '}
+                (Ex.: 5 mg = {((5 / (currentPenMg / 0.5)) * 100).toFixed(1).replace('.', ',')} UI)
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                inputMode="decimal"
-                value={mgPer100Units}
-                onChange={(e) => setMgPer100Units(e.target.value)}
-                className="w-20 px-3 py-1.5 text-center text-sm font-bold bg-white rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
-              />
-              <span className="text-xs font-bold text-gray-500">mg / ml</span>
+
+            <div className="flex items-center gap-2 self-start sm:self-center">
+              <span className="text-xs font-bold text-[#F43F8E] px-3 py-1 bg-white rounded-xl border border-[#F9A8C9]">
+                {useCustomConc
+                  ? customConcValue
+                  : (currentPenMg / 0.5).toFixed(1).replace('.0', '')}{' '}
+                mg/ml
+              </span>
             </div>
+          </div>
+
+          <div className="pt-2 border-t border-gray-200/80 flex items-center justify-between">
+            <label className="text-xs text-gray-600 flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={useCustomConc}
+                onChange={(e) => {
+                  setUseCustomConc(e.target.checked)
+                  if (!e.target.checked) {
+                    setCustomConcValue(String(currentPenMg / 0.5).replace('.', ','))
+                  }
+                }}
+                className="rounded text-[#F43F8E] focus:ring-[#F43F8E]"
+              />
+              <span>Usar concentração manipulada personalizada (mg/ml)</span>
+            </label>
+
+            {useCustomConc && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={customConcValue}
+                  onChange={(e) => setCustomConcValue(e.target.value)}
+                  placeholder="Ex: 30"
+                  className="w-20 px-2.5 py-1 text-center text-xs font-bold bg-white rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                />
+                <span className="text-xs font-bold text-gray-500">mg/ml</span>
+              </div>
+            )}
           </div>
         </div>
 

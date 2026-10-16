@@ -17,8 +17,7 @@ export const DEFAULT_PROFILE: UserProfile = {
   pinkTheme: 'classic',
   waterUnit: 'L',
   weightUnit: 'kg',
-  currentPenMg: 5.0,
-  mgPer100Units: 25.0, // 25 mg/ml -> 10 un = 2,5 mg, 20 un = 5,0 mg
+  currentPenMg: 15.0, // Caneta 15 mg (30 mg/ml em 0,5 ml)
   titrationPlan: [
     {
       id: 'titr-1',
@@ -41,7 +40,7 @@ export const INITIAL_DOSES: DoseRecord[] = [
     id: 'dose-1',
     date: '2025-02-13',
     time: '20:00',
-    units: 10,
+    units: 8.3,
     site: 'Barriga',
     mgDose: 2.5,
     createdAt: '2025-02-13T20:00:00.000Z',
@@ -50,7 +49,7 @@ export const INITIAL_DOSES: DoseRecord[] = [
     id: 'dose-2',
     date: '2025-02-20',
     time: '20:15',
-    units: 10,
+    units: 8.3,
     site: 'Coxa',
     mgDose: 2.5,
     createdAt: '2025-02-20T20:15:00.000Z',
@@ -59,7 +58,7 @@ export const INITIAL_DOSES: DoseRecord[] = [
     id: 'dose-3',
     date: '2025-02-27',
     time: '19:45',
-    units: 20,
+    units: 16.7,
     site: 'Barriga',
     mgDose: 5.0,
     createdAt: '2025-02-27T19:45:00.000Z',
@@ -68,7 +67,7 @@ export const INITIAL_DOSES: DoseRecord[] = [
     id: 'dose-4',
     date: '2025-03-06',
     time: '20:00',
-    units: 20,
+    units: 16.7,
     site: 'Braço',
     mgDose: 5.0,
     createdAt: '2025-03-06T20:00:00.000Z',

@@ -5,6 +5,7 @@ interface SyringeAnimationProps {
   units: number // 0 a 60 unidades
   maxUnits?: number
   mgEquivalent?: number
+  mlEquivalent?: number
 }
 
 /**
@@ -30,6 +31,7 @@ export default function SyringeAnimation({
   units,
   maxUnits = 60,
   mgEquivalent,
+  mlEquivalent,
 }: SyringeAnimationProps) {
   // Limites seguros
   const safeUnits = Math.max(0, Math.min(maxUnits, units))
@@ -178,10 +180,11 @@ export default function SyringeAnimation({
         </div>
 
         {/* ÁREA CENTRAL DO DESENHO DA SERINGA NA HORIZONTAL */}
-        <div className="relative w-full flex items-center justify-center py-1 overflow-x-auto scrollbar-none">
+        <div className="relative w-full flex items-center justify-center py-0.5 overflow-hidden">
           <svg
-            viewBox="0 0 1140 240"
-            className="w-full min-w-[620px] max-w-[1040px] h-auto drop-shadow-md overflow-visible"
+            viewBox="0 0 1140 230"
+            preserveAspectRatio="xMidYMid meet"
+            className="w-full h-auto max-h-[170px] sm:max-h-[200px] lg:max-h-[220px] drop-shadow-md overflow-visible"
             role="img"
             aria-label={`Seringa horizontal de insulina 0,5 ml 50 UI agulha fixa com ${safeUnits} unidades puxadas`}
           >
@@ -1082,11 +1085,13 @@ export default function SyringeAnimation({
                   y="21"
                   textAnchor="middle"
                   fill="#FFFFFF"
-                  fontSize="12"
+                  fontSize={mlEquivalent !== undefined ? '10' : '12'}
                   fontWeight="800"
                   fontFamily="Poppins, sans-serif"
                 >
-                  {safeUnits} un {mgEquivalent !== undefined ? `• ${mgEquivalent}mg` : ''}
+                  {safeUnits % 1 === 0 ? safeUnits : safeUnits.toFixed(1)} UI
+                  {mgEquivalent !== undefined ? ` • ${mgEquivalent} mg` : ''}
+                  {mlEquivalent !== undefined ? ` • ${mlEquivalent.toFixed(2)} ml` : ''}
                 </text>
 
                 {/* Seta do balão apontando para a linha do menisco */}

@@ -25,8 +25,10 @@ interface TerezaContextType {
   updateProfile: (updates: Partial<UserProfile>) => void
   addTitrationStep: (step: Omit<import('@/types').TitrationStep, 'id'>) => void
   deleteTitrationStep: (id: string) => void
+  concentrationMgMl: number // Concentração efetiva em mg/ml
   calculateMgFromUnits: (units: number) => number
   calculateUnitsFromMg: (mg: number) => number
+  calculateMlFromUnits: (units: number) => number
 
   doses: DoseRecord[]
   addDose: (dose: Omit<DoseRecord, 'id' | 'createdAt'>) => void
@@ -270,18 +272,40 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }))
   }
 
-  // Conversão de unidades para mg baseada no perfil
+  // Concentração efetiva em mg/ml:
+  // Cada caneta de tirzepatida entrega sua dose em 0,5 ml:
+  // concentração (mg/ml) = mg da caneta / 0,5 ml
+  // Ex: 15 mg -> 30 mg/ml; 5 mg -> 10 mg/ml; 2,5 mg -> 5 mg/ml
+  // Se o usuário tiver especificado customConcentrationMgMl, usa-se ela.
+  const concentrationMgMl = useMemo<number>(() => {
+    if (profile.customConcentrationMgMl && profile.customConcentrationMgMl > 0) {
+      return profile.customConcentrationMgMl
+    }
+    const penMg = profile.currentPenMg || 15.0 // padrão 15mg
+    return penMg / 0.5
+  }, [profile.currentPenMg, profile.customConcentrationMgMl])
+
+  // Conversão de unidades para volume em ml (100 UI = 1 ml)
+  const calculateMlFromUnits = (units: number): number => {
+    return Math.round((units / 100) * 1000) / 1000
+  }
+
+  // Conversão de unidades para mg baseada na caneta selecionada
+  // dose mg = ml * concentração = (units / 100) * concentração
   const calculateMgFromUnits = (units: number): number => {
-    const mgPer100 = profile.mgPer100Units || 25.0 // padrão 25mg / 100un (0.25 mg/un)
-    const mg = (units / 100) * mgPer100
+    const mg = (units / 100) * concentrationMgMl
     return Math.round(mg * 100) / 100
   }
 
+  // Conversão de mg para unidades:
+  // ml necessários = dose mg / concentração
+  // unidades = ml * 100 = (dose mg / concentração) * 100
+  // Exemplo com caneta de 15 mg: 5 mg / 30 mg/ml * 100 = 16.6667 -> 16.7 UI (ou arredondado para 17)
   const calculateUnitsFromMg = (mg: number): number => {
-    const mgPer100 = profile.mgPer100Units || 25.0
-    if (mgPer100 <= 0) return 0
-    const units = (mg / mgPer100) * 100
-    return Math.round(units * 2) / 2 // passo 0.5
+    if (concentrationMgMl <= 0) return 0
+    const rawUnits = (mg / concentrationMgMl) * 100
+    // Retorna arredondado para 1 casa decimal (ex: 16.7) ou com meio ponto
+    return Math.round(rawUnits * 10) / 10
   }
 
   // Ações de Doses
@@ -462,19 +486,20 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const nextDoseInfo = useMemo(() => {
     const latestDose = doses[0]
     const intervalDays = reminders.intervalDays || 7
-    const currentConfigMg = profile.currentPenMg
-    const calculatedDefaultMg = currentConfigMg || (latestDose?.mgDose ?? 5.0)
-    const mgPer100 = profile.mgPer100Units || 25.0
-    const calculatedDefaultUnits = latestDose?.units || (calculatedDefaultMg / mgPer100) * 100
+    const currentConfigMg = profile.currentPenMg || 15.0
+    const calculatedDefaultMg = latestDose?.mgDose ?? currentConfigMg
+    const calculatedDefaultUnits =
+      latestDose?.units ?? Math.round((calculatedDefaultMg / concentrationMgMl) * 100 * 10) / 10
     const reminderTime = reminders.medicationTime || '20:00'
 
     if (!latestDose) {
-      const initMg = profile.currentPenMg || 2.5
+      const initMg = profile.currentPenMg || 5.0
+      const initUnits = Math.round((initMg / concentrationMgMl) * 100 * 10) / 10
       return {
         dateStr: getTodayDateString(),
         timeStr: reminderTime,
         mgDose: initMg,
-        units: (initMg / mgPer100) * 100,
+        units: initUnits,
         isToday: true,
         isPast: false,
       }
@@ -495,7 +520,7 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       isToday: nextDateStr === today,
       isPast: nextDateStr < today,
     }
-  }, [doses, reminders, profile.currentPenMg, profile.mgPer100Units])
+  }, [doses, reminders, profile.currentPenMg, concentrationMgMl])
 
   // Alerta de água expirado
   const isWaterReminderDue = useMemo(() => {
@@ -612,6 +637,8 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     updateProfile,
     addTitrationStep,
     deleteTitrationStep,
+    concentrationMgMl,
+    calculateMlFromUnits,
     calculateMgFromUnits,
     calculateUnitsFromMg,
     doses,
