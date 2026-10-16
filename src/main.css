@@ -82,6 +82,25 @@
       color 300ms ease;
   }
 
+  /* Transição suave em elementos que usam as cores do tema ao alternar gênero */
+  button,
+  a,
+  svg,
+  path,
+  circle,
+  rect,
+  .bg-theme-core,
+  .bg-theme-subtle,
+  .bg-theme-light,
+  .bg-theme-hover,
+  .text-theme-core,
+  .border-theme-core,
+  .border-theme-subtle {
+    transition-property: color, background-color, border-color, fill, stroke, box-shadow;
+    transition-duration: 250ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   /* NEVER REMOVE THIS */
   section[aria-label='Notifications alt+T'] {
     padding: 0 !important;
@@ -91,35 +110,42 @@
 
 @layer utilities {
   .bg-pink-core,
-  .bg-theme-core {
+  .bg-theme-core,
+  .bg-primary-color {
     background-color: var(--primary-color);
   }
   .bg-pink-hover,
   .bg-theme-hover {
     background-color: var(--primary-hover);
   }
-  .bg-theme-subtle {
+  .bg-theme-subtle,
+  .bg-primary-subtle {
     background-color: var(--primary-subtle);
   }
-  .bg-theme-light {
+  .bg-theme-light,
+  .bg-primary-light {
     background-color: var(--primary-light);
   }
   .text-pink-core,
-  .text-theme-core {
+  .text-theme-core,
+  .text-primary-color {
     color: var(--primary-color);
   }
   .text-theme-hover {
     color: var(--primary-hover);
   }
   .border-pink-core,
-  .border-theme-core {
+  .border-theme-core,
+  .border-primary-color {
     border-color: var(--primary-color);
   }
-  .border-theme-subtle {
+  .border-theme-subtle,
+  .border-primary-subtle {
     border-color: var(--primary-subtle-border);
   }
   .ring-pink-core,
-  .ring-theme-core {
+  .ring-theme-core,
+  .ring-primary-color {
     --tw-ring-color: var(--primary-color);
   }
 

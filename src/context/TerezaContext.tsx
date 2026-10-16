@@ -214,7 +214,10 @@ export const THEME_PALETTES: Record<ColorFamily, Record<string, ThemePalette>> =
 
 export function resolveCurrentPalette(profile: UserProfile): ThemePalette {
   const gender = profile.gender || 'female'
-  const baseFamily: ColorFamily = profile.colorFamily || GENDER_THEME_MAP[gender] || 'pink'
+  // O gênero determina a família de cores principal. Se colorFamily for explicitamente compatível, usa-se, senão sincroniza com o gênero.
+  const mappedFamily = GENDER_THEME_MAP[gender] || 'pink'
+  const baseFamily: ColorFamily =
+    profile.colorFamily && THEME_PALETTES[profile.colorFamily] ? profile.colorFamily : mappedFamily
 
   const familyPalettes = THEME_PALETTES[baseFamily] || THEME_PALETTES.pink
   const subTone = profile.pinkTheme || 'classic'
@@ -446,7 +449,7 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const activeColorFamily = currentPalette.colorFamily
 
-  // Aplicar variáveis CSS no root (:root) para todo o app
+  // Aplicar variáveis CSS no root (:root) para todo o app com transição suave
   useEffect(() => {
     const root = document.documentElement
 
@@ -461,11 +464,12 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     root.style.setProperty('--primary-liquid-middle', currentPalette.liquidMiddle)
     root.style.setProperty('--primary-liquid-end', currentPalette.liquidEnd)
 
-    // Retrocompatibilidade para variáveis legadas --pink-*
+    // Retrocompatibilidade total para variáveis legadas --pink-* (repontuadas na paleta ativa)
     root.style.setProperty('--pink-primary', currentPalette.primary)
     root.style.setProperty('--pink-hover', currentPalette.hover)
     root.style.setProperty('--pink-light', currentPalette.light)
     root.style.setProperty('--pink-subtle', currentPalette.subtle)
+    root.style.setProperty('--pink-peach', currentPalette.light)
 
     // Variáveis shadcn/ui
     root.style.setProperty('--primary', currentPalette.primaryHsl)
@@ -474,6 +478,10 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     root.style.setProperty('--ring', currentPalette.ringHsl)
     root.style.setProperty('--sidebar-primary', currentPalette.primaryHsl)
     root.style.setProperty('--sidebar-ring', currentPalette.ringHsl)
+    root.style.setProperty('--sidebar-accent', currentPalette.secondaryHsl)
+
+    // Atributo data-color-family para estilizações adicionais se necessário
+    root.setAttribute('data-color-family', currentPalette.colorFamily)
   }, [currentPalette])
 
   // Ações de Perfil

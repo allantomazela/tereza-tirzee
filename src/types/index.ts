@@ -1,4 +1,12 @@
-export type PinkTheme = 'classic' | 'peach' | 'lavender'
+export type PinkTheme =
+  | 'classic'
+  | 'peach'
+  | 'lavender'
+  | 'cyan'
+  | 'indigo'
+  | 'gold'
+  | 'sun'
+  | string
 
 export type GenderType = 'female' | 'male' | 'non_binary' | 'agender' | 'prefer_not_to_say'
 

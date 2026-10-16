@@ -40,7 +40,6 @@ export default function Doses() {
   const initialUnits = nextDoseInfo.units || (profile.currentPenMg === 15 ? 17 : 20)
   const [units, setUnits] = useState<number>(initialUnits)
   const [manualInput, setManualInput] = useState<string>(String(initialUnits))
-  const [showManual, setShowManual] = useState<boolean>(false)
   const [site, setSite] = useState<InjectionSite>('Barriga')
   const [date, setDate] = useState<string>(getTodayDateString())
   const [time, setTime] = useState<string>(getCurrentTimeString())
@@ -180,8 +179,9 @@ export default function Doses() {
       {/* 2) PAINEL DE CONTROLE DE DOSE LOGO ABAIXO DA SERINGA */}
       <div className="bg-white rounded-3xl p-5 sm:p-7 border border-[#E5E7EB] shadow-card-soft space-y-6">
         {/* PARTE DE INSERIR O VALOR (CONTADOR + SLIDER + ATALHOS + MANUAL) */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-gray-100">
+        <div className="space-y-5">
+          {/* TOPO: CONTADOR EM DESTAQUE + EQUIVALÊNCIAS */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-gray-100">
             {/* CONTADOR GRANDE */}
             <div className="text-center sm:text-left space-y-1">
               <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
@@ -204,114 +204,68 @@ export default function Doses() {
 
             {/* EQUIVALÊNCIAS EM MG E ML */}
             <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
-              <span className="px-3 py-1.5 rounded-2xl bg-(--primary-subtle) text-(--primary-color) text-xs sm:text-sm font-extrabold shadow-2xs">
+              <span className="px-3.5 py-2 rounded-2xl bg-(--primary-subtle) text-(--primary-color) text-xs sm:text-sm font-extrabold shadow-2xs border border-(--primary-subtle-border)">
                 ≈ {formatNumberBr(calculatedMg, calculatedMg % 1 === 0 ? 0 : 2)} mg de Tirzepatida
               </span>
-              <span className="px-2.5 py-1.5 rounded-2xl bg-blue-50 text-blue-600 text-xs font-bold">
+              <span className="px-3 py-2 rounded-2xl bg-blue-50 text-blue-600 text-xs font-bold border border-blue-100">
                 {formatNumberBr(calculatedMl, 2)} ml
               </span>
-              <span className="text-[11px] text-[#6B7280] block sm:inline">
+              <span className="text-[11px] text-[#6B7280] block sm:inline w-full sm:w-auto text-center sm:text-right">
                 (Caneta {profile.currentPenMg || 15} mg • {concentrationMgMl} mg/ml)
               </span>
             </div>
           </div>
 
-          {/* CONTROLE DESLIZANTE (SLIDER 0 - 60) */}
-          <div className="space-y-2 pt-1">
-            <div className="flex items-center justify-between text-xs font-bold text-[#6B7280]">
-              <span>0 UI (0 ml)</span>
-              <span className="text-(--primary-color) font-black text-sm">
+          {/* CONTROLE DESLIZANTE DE DOSE (SLIDER 0 A 60 UI COM PASSO 0,5) */}
+          <div className="space-y-3 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#FAF9FB] to-[#F3EFF4] border border-[#E5E7EB] shadow-2xs">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-xs font-bold text-[#6B7280]">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-gray-400" />
+                Mover a barra para definir a dose:
+              </span>
+              <span className="text-(--primary-color) font-black text-sm sm:text-base flex items-center gap-1">
+                <Sparkles className="w-4 h-4 text-(--primary-color)" />
                 Puxar êmbolo até: {formatNumberBr(units, 1)} UI ({formatNumberBr(calculatedMl, 2)}{' '}
                 ml)
               </span>
-              <span>60 UI (0,6 ml)</span>
             </div>
 
-            <div className="relative py-1">
+            {/* Barra do slider com gradiente de preenchimento até a dose atual */}
+            <div className="relative py-2">
               <input
                 type="range"
                 min="0"
                 max="60"
                 step="0.5"
                 value={units}
-                aria-label="Ajustar unidades da dose"
+                aria-label="Ajustar unidades da dose movendo a barra"
                 onChange={(e) => handleSliderChange(parseFloat(e.target.value))}
-                style={{ accentColor: 'var(--primary-color)' }}
-                className="w-full h-3 bg-(--primary-subtle) rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-(--primary-color)"
+                style={{
+                  accentColor: 'var(--primary-color)',
+                  background: `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${(units / 60) * 100}%, #E2E8F0 ${(units / 60) * 100}%, #E2E8F0 100%)`,
+                }}
+                className="w-full h-3.5 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-(--primary-color) shadow-inner"
               />
             </div>
 
-            {/* ATALHOS RÁPIDOS DE DOSES CLÍNICAS (TABELA OFICIAL) */}
-            <div className="space-y-2 pt-2">
-              <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase tracking-wide">
-                <span>Atalhos rápidos do fracionamento oficial:</span>
-                <span className="text-(--primary-color) font-medium normal-case">
-                  Ampola {profile.currentPenMg || 15} mg / 0,5 ml
-                </span>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-                {[
-                  { mgVal: 2.5, unVal: 8, color: '#6B7280' },
-                  { mgVal: 5.0, unVal: 17, color: '#8B5CF6' },
-                  { mgVal: 7.5, unVal: 25, color: '#10B981' },
-                  { mgVal: 10.0, unVal: 33, color: '#EC4899' },
-                  { mgVal: 12.5, unVal: 42, color: '#3B82F6' },
-                  { mgVal: 15.0, unVal: 50, color: '#F97316' },
-                ].map(({ mgVal, unVal, color }) => {
-                  const isSelected = Math.abs(units - unVal) < 0.25
-                  return (
-                    <button
-                      key={mgVal}
-                      type="button"
-                      onClick={() => handleSliderChange(unVal)}
-                      className={cn(
-                        'px-3 py-2 rounded-2xl text-xs font-bold transition-all btn-tap-scale flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer border',
-                        isSelected
-                          ? 'text-white shadow-md'
-                          : 'bg-[#F7F4F6] text-[#1F1A1D] hover:bg-(--primary-subtle) border-gray-200',
-                      )}
-                      style={{
-                        backgroundColor: isSelected ? color : undefined,
-                        borderColor: isSelected ? color : undefined,
-                      }}
-                    >
-                      <span
-                        className="w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: isSelected ? '#FFFFFF' : color }}
-                      />
-                      <span>{mgVal} mg</span>
-                      <span className="text-[11px] opacity-85">({unVal} UI)</span>
-                    </button>
-                  )
-                })}
-              </div>
+            <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 pt-0.5">
+              <span>0 UI (0 ml)</span>
+              <span>15 UI</span>
+              <span>30 UI</span>
+              <span>45 UI</span>
+              <span>60 UI (0,6 ml)</span>
             </div>
 
-            {/* BOTÃO PARA INSERIR MANUALMENTE */}
-            <div className="text-center sm:text-left pt-1">
-              <button
-                type="button"
-                onClick={() => setShowManual(!showManual)}
-                className="text-xs font-semibold text-(--primary-color) hover:underline cursor-pointer inline-flex items-center gap-1"
-              >
-                <span>
-                  {showManual
-                    ? 'Ocultar digitação manual'
-                    : 'Prefere digitar o número? Clique aqui'}
-                </span>
-              </button>
-            </div>
-
-            {/* CAMPO NUMÉRICO SINCRONIZADO BIDIRECIONALMENTE */}
-            {showManual && (
-              <div className="p-3.5 rounded-2xl bg-[#F7F4F6] border border-[#E5E7EB] space-y-2 animate-fade-in max-w-sm">
+            {/* CAMPO DE DIGITAÇÃO MANUAL DIRETO E SINCRONIZADO NOS DOIS SENTIDOS */}
+            <div className="pt-2 border-t border-gray-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
                 <label
                   htmlFor={manualInputId}
-                  className="block text-xs font-semibold text-gray-700"
+                  className="text-xs font-bold text-gray-700 whitespace-nowrap"
                 >
-                  Digite a dose em unidades UI (0 a 60):
+                  Ou digite a dose exata:
                 </label>
-                <div className="flex items-center gap-2">
+                <div className="relative inline-flex items-center">
                   <input
                     id={manualInputId}
                     type="text"
@@ -320,22 +274,92 @@ export default function Doses() {
                     onChange={(e) => handleManualChange(e.target.value)}
                     placeholder="Ex: 17"
                     className={cn(
-                      'w-full px-3.5 py-2 text-center text-lg font-black bg-white rounded-xl border focus:outline-none focus:ring-2',
+                      'w-24 px-3 py-1.5 text-center text-base font-black bg-white rounded-xl border shadow-2xs focus:outline-none focus:ring-2',
                       errorMsg
                         ? 'border-red-500 text-red-600 focus:ring-red-400'
                         : 'border-gray-300 text-[#1F1A1D] focus:ring-(--primary-color)',
                     )}
                   />
-                  <span className="text-xs font-extrabold text-gray-500">UI</span>
+                  <span className="ml-1.5 text-xs font-extrabold text-gray-500">UI</span>
                 </div>
-                {errorMsg && (
-                  <div className="flex items-center gap-1 text-xs text-red-600 font-medium">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{errorMsg}</span>
-                  </div>
-                )}
+              </div>
+
+              {/* Botões de ajuste fino +/- 0.5 */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-gray-500 font-medium">Ajuste fino:</span>
+                <button
+                  type="button"
+                  onClick={() => handleSliderChange(Math.max(0, Math.round((units - 0.5) * 2) / 2))}
+                  className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 cursor-pointer shadow-2xs active:scale-95"
+                  title="Diminuir 0,5 UI"
+                >
+                  -0,5 UI
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleSliderChange(Math.min(60, Math.round((units + 0.5) * 2) / 2))
+                  }
+                  className="px-2.5 py-1 text-xs font-bold rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 cursor-pointer shadow-2xs active:scale-95"
+                  title="Aumentar 0,5 UI"
+                >
+                  +0,5 UI
+                </button>
+              </div>
+            </div>
+
+            {errorMsg && (
+              <div className="flex items-center gap-1.5 text-xs text-red-600 font-semibold pt-1">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{errorMsg}</span>
               </div>
             )}
+          </div>
+
+          {/* ATALHOS RÁPIDOS DE DOSES CLÍNICAS (TABELA OFICIAL DE FRACIONAMENTO) */}
+          <div className="space-y-2.5 pt-1">
+            <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase tracking-wide">
+              <span>Atalhos rápidos do fracionamento oficial:</span>
+              <span className="text-(--primary-color) font-medium normal-case">
+                Ampola {profile.currentPenMg || 15} mg / 0,5 ml
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+              {[
+                { mgVal: 2.5, unVal: 8, color: '#6B7280' },
+                { mgVal: 5.0, unVal: 17, color: '#8B5CF6' },
+                { mgVal: 7.5, unVal: 25, color: '#10B981' },
+                { mgVal: 10.0, unVal: 33, color: '#EC4899' },
+                { mgVal: 12.5, unVal: 42, color: '#3B82F6' },
+                { mgVal: 15.0, unVal: 50, color: '#F97316' },
+              ].map(({ mgVal, unVal, color }) => {
+                const isSelected = Math.abs(units - unVal) < 0.25
+                return (
+                  <button
+                    key={mgVal}
+                    type="button"
+                    onClick={() => handleSliderChange(unVal)}
+                    className={cn(
+                      'px-3 py-2.5 rounded-2xl text-xs font-bold transition-all btn-tap-scale flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer border',
+                      isSelected
+                        ? 'text-white shadow-md'
+                        : 'bg-[#F7F4F6] text-[#1F1A1D] hover:bg-(--primary-subtle) border-gray-200',
+                    )}
+                    style={{
+                      backgroundColor: isSelected ? color : undefined,
+                      borderColor: isSelected ? color : undefined,
+                    }}
+                  >
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: isSelected ? '#FFFFFF' : color }}
+                    />
+                    <span>{mgVal} mg</span>
+                    <span className="text-[11px] opacity-85">({unVal} UI)</span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </div>
 

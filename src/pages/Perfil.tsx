@@ -1,4 +1,4 @@
-import { useState, useId } from 'react'
+import { useState, useEffect, useId } from 'react'
 import {
   UserCircle,
   Bell,
@@ -109,6 +109,16 @@ export default function Perfil() {
 
   // Subtom / Variação de cor
   const [selectedTheme, setSelectedTheme] = useState<string>(profile.pinkTheme || 'classic')
+
+  // Sincronizar estados com o perfil quando o contexto atualizar
+  useEffect(() => {
+    if (profile.gender && profile.gender !== gender) {
+      setGender(profile.gender)
+    }
+    if (profile.pinkTheme && profile.pinkTheme !== selectedTheme) {
+      setSelectedTheme(profile.pinkTheme)
+    }
+  }, [profile.gender, profile.pinkTheme])
 
   // Modais de Reset e Toasts
   const [resetModalStep, setResetModalStep] = useState<0 | 1 | 2>(0)
@@ -358,18 +368,20 @@ export default function Perfil() {
                     type="button"
                     onClick={() => {
                       setGender(g.id)
+                      setSelectedTheme('classic')
                       const newFamily = GENDER_THEME_MAP[g.id]
-                      // Sincroniza imediatamente o tema para efeito visual instantâneo
+                      // Sincroniza imediatamente o perfil e o tema para troca instantânea em todas as 6 telas
                       updateProfile({
                         gender: g.id,
                         colorFamily: newFamily,
+                        pinkTheme: 'classic',
                       })
                       triggerToast(
                         `Gênero alterado: tema ${newFamily === 'pink' ? 'Rosa' : newFamily === 'blue' ? 'Azul' : 'Amarelo/Dourado'} aplicado!`,
                       )
                     }}
                     className={cn(
-                      'px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all chip-scale flex items-center gap-2',
+                      'px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all chip-scale flex items-center gap-2 cursor-pointer',
                       isSelected
                         ? 'border-(--primary-color) bg-(--primary-subtle) text-(--primary-color) shadow-xs'
                         : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50',
@@ -886,11 +898,14 @@ export default function Perfil() {
                   type="button"
                   onClick={() => {
                     setSelectedTheme(key)
-                    updateProfile({ pinkTheme: key as import('@/types').PinkTheme })
+                    updateProfile({
+                      pinkTheme: key as import('@/types').PinkTheme,
+                      colorFamily: activeColorFamily,
+                    })
                     triggerToast(`Subtom alterado para ${opt.name}!`)
                   }}
                   className={cn(
-                    'p-4 rounded-2xl border text-left transition-all chip-scale flex items-center gap-3',
+                    'p-4 rounded-2xl border text-left transition-all chip-scale flex items-center gap-3 cursor-pointer',
                     isSelected
                       ? 'border-(--primary-color) bg-(--primary-subtle) shadow-xs'
                       : 'border-gray-200 bg-white hover:bg-gray-50',
