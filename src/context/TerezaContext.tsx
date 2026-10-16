@@ -19,6 +19,7 @@ import {
   INITIAL_REMINDERS,
 } from '@/lib/mockData'
 import { getISOWeek, getTodayDateString, calculateIMC } from '@/lib/formatters'
+import { convertUnitsToMgOfficial, convertMgToUnitsOfficial } from '@/lib/fractionation'
 
 interface TerezaContextType {
   profile: UserProfile
@@ -290,21 +291,36 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return Math.round((units / 100) * 1000) / 1000
   }
 
-  // Conversão de unidades para mg baseada na caneta selecionada
-  // dose mg = ml * concentração = (units / 100) * concentração
+  // Conversão de unidades para mg:
+  // Para caneta de 15 mg/0,5 ml sem concentração customizada, usa a tabela oficial de fracionamento
+  // (2,5mg=8UI, 5,0mg=17UI, 7,5mg=25UI, 10,0mg=33UI, 12,5mg=42UI, 15,0mg=50UI)
+  // Para outras canetas ou concentração customizada, usa a relação física direta (mg = ml * conc).
   const calculateMgFromUnits = (units: number): number => {
+    const isStandard15mg =
+      (!profile.customConcentrationMgMl || profile.customConcentrationMgMl <= 0) &&
+      (profile.currentPenMg === undefined || profile.currentPenMg === 15)
+
+    if (isStandard15mg) {
+      return convertUnitsToMgOfficial(units)
+    }
+
     const mg = (units / 100) * concentrationMgMl
     return Math.round(mg * 100) / 100
   }
 
   // Conversão de mg para unidades:
-  // ml necessários = dose mg / concentração
-  // unidades = ml * 100 = (dose mg / concentração) * 100
-  // Exemplo com caneta de 15 mg: 5 mg / 30 mg/ml * 100 = 16.6667 -> 16.7 UI (ou arredondado para 17)
+  // Para caneta de 15 mg/0,5 ml, usa os pontos oficiais arredondados (ex: 5 mg -> 17 UI)
   const calculateUnitsFromMg = (mg: number): number => {
+    const isStandard15mg =
+      (!profile.customConcentrationMgMl || profile.customConcentrationMgMl <= 0) &&
+      (profile.currentPenMg === undefined || profile.currentPenMg === 15)
+
+    if (isStandard15mg) {
+      return convertMgToUnitsOfficial(mg)
+    }
+
     if (concentrationMgMl <= 0) return 0
     const rawUnits = (mg / concentrationMgMl) * 100
-    // Retorna arredondado para 1 casa decimal (ex: 16.7) ou com meio ponto
     return Math.round(rawUnits * 10) / 10
   }
 
@@ -488,13 +504,21 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     const intervalDays = reminders.intervalDays || 7
     const currentConfigMg = profile.currentPenMg || 15.0
     const calculatedDefaultMg = latestDose?.mgDose ?? currentConfigMg
-    const calculatedDefaultUnits =
-      latestDose?.units ?? Math.round((calculatedDefaultMg / concentrationMgMl) * 100 * 10) / 10
+    const isStandard15mg =
+      (!profile.customConcentrationMgMl || profile.customConcentrationMgMl <= 0) &&
+      (profile.currentPenMg === undefined || profile.currentPenMg === 15)
+
+    const calcUnitsFromMgLocal = (mgVal: number) => {
+      if (isStandard15mg) return convertMgToUnitsOfficial(mgVal)
+      return concentrationMgMl > 0 ? Math.round((mgVal / concentrationMgMl) * 100 * 10) / 10 : 0
+    }
+
+    const calculatedDefaultUnits = latestDose?.units ?? calcUnitsFromMgLocal(calculatedDefaultMg)
     const reminderTime = reminders.medicationTime || '20:00'
 
     if (!latestDose) {
       const initMg = profile.currentPenMg || 5.0
-      const initUnits = Math.round((initMg / concentrationMgMl) * 100 * 10) / 10
+      const initUnits = calcUnitsFromMgLocal(initMg)
       return {
         dateStr: getTodayDateString(),
         timeStr: reminderTime,

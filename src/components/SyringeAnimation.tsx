@@ -1,37 +1,36 @@
 import { useMemo, useState } from 'react'
-import { Eye, EyeOff, ShieldCheck, Sparkles } from 'lucide-react'
+import { Eye, EyeOff, ShieldCheck, Sparkles, CheckCircle2, Info } from 'lucide-react'
+import {
+  OFFICIAL_15MG_FRACTIONATION,
+  findClosestOfficialDose,
+  OfficialFractionationDose,
+} from '@/lib/fractionation'
+import { cn } from '@/lib/utils'
 
 interface SyringeAnimationProps {
   units: number // 0 a 60 unidades
   maxUnits?: number
   mgEquivalent?: number
   mlEquivalent?: number
+  onSelectOfficialDose?: (dose: OfficialFractionationDose) => void
 }
 
 /**
  * Seringa de Insulina 0,5 ml / 50 UI com Agulha Fixa Ultrafina — ORIENTAÇÃO HORIZONTAL
  *
- * Requisitos clínicos e mecânicos:
- * - Orientação HORIZONTAL realista:
- *     * Extremidade ESQUERDA: agulha ultrafina com bisel metálico, microgota pulsante, bico reforçado
- *     * Meio: cilindro de vidro/plástico cristalino com escala graduada fiel de 5 a 50 UNITS (estendida a 60)
- *       e rótulo "UNITS • 0,5 ml"
- *     * Extremidade DIREITA: flange dos dedos (finger grip) e o êmbolo móvel laranja
- * - Funcionamento mecânico do êmbolo (puxar medicamento):
- *     * Em 0 UI (vazio): o pistão de vedação laranja está encostado no início do cilindro (próximo à agulha/zero).
- *       A haste rígida e o disco de apoio do polegar ficam VISÍVEIS PARA FORA do cilindro à direita,
- *       permitindo a pega dos dedos para puxar.
- *     * Conforme a dose aumenta (0 -> 60 UI): o pistão de vedação laranja se desloca para a direita,
- *       puxando a coluna de medicamento rosa translúcido (com menisco e microbolhas) para dentro do cilindro,
- *       e o disco de apoio do polegar se afasta ainda mais para a direita.
- * - Tampa de proteção laranja com botão alternável (colocada sobre a agulha ou guardada ao lado).
- * - Tag flutuante de dosagem (unidades e mg) sincronizada em tempo real com o nível do líquido.
+ * Inclui:
+ * 1. Marcas oficiais coloridas de fracionamento da ampola de 15 mg/0,5 ml (8, 17, 25, 33, 42, 50 UI)
+ * 2. Realce no ponto exato onde puxar quando a dose atual coincide ou se aproxima da marca oficial
+ * 3. Tag flutuante com indicador "Ponto exato" nas doses oficiais
+ * 4. Painel-legenda interativo "Fracionamento ampola de 15mg/0,5ml" com as 6 doses coloridas
+ * 5. Agulha fixa com bisel metálico, tampa laranja alternável, êmbolo com pega à direita
  */
 export default function SyringeAnimation({
   units,
   maxUnits = 60,
   mgEquivalent,
   mlEquivalent,
+  onSelectOfficialDose,
 }: SyringeAnimationProps) {
   // Limites seguros
   const safeUnits = Math.max(0, Math.min(maxUnits, units))
@@ -39,54 +38,23 @@ export default function SyringeAnimation({
   // Estado da capa protetora de agulha (tampa laranja de agulha fixa)
   const [showCap, setShowCap] = useState<boolean>(false)
 
+  // Verifica se o valor atual coincide com uma dose oficial (tolerância 0.6 UI)
+  const matchedOfficial = useMemo(() => {
+    return findClosestOfficialDose(safeUnits, 0.6)
+  }, [safeUnits])
+
+  const isExactHit = matchedOfficial !== null && Math.abs(safeUnits - matchedOfficial.units) <= 0.25
+
   // =========================================================================
   // SISTEMA DE COORDENADAS DO SVG HORIZONTAL:
-  // viewBox: "0 0 1000 240"
+  // viewBox: "0 0 1140 240"
   // Eixo Y central da seringa: 120
-  //
-  // 1. Agulha fixa (Esquerda):
-  // - Ponta da agulha: x = 40 (com bisel trifacetado e microgota rosa em x = 36)
-  // - Cânula metálica ultrafina de x = 40 até x = 145 (comprimento 105px, aço cirúrgico)
-  // - Tampa laranja quando ativa: x = 30 até x = 150
-  //
-  // 2. Conexão reforçada / bico transparente cônico integrado:
-  // - x = 145 até x = 210
-  // - Cone: x = 145 a 175
-  // - Colar cilíndrico com anéis de reforço: x = 175 a 198
-  // - Ombros curvos do cilindro: x = 198 a 210
-  //
-  // 3. Cilindro de vidro (Barrel):
-  // - Início do cilindro útil: x = 210
-  // - Altura do cilindro: 56px (y: 92 a 148, raio 28px)
-  // - Escala graduada (zero a 50 UI):
+  // Cilindro útil: barrelTop = 92, barrelBottom = 148, altura = 56
+  // barrelStartX = 210, barrelEndX = 645
+  // Escala graduada (zero a 50 UI):
   //   * 0 UNITS: x = 224
   //   * 50 UNITS: x = 554 (distância útil = 330px -> 6.6px por unidade)
   //   * 60 UNITS (limite máximo): x = 620
-  // - Fim do cilindro / posição da flange de dedos: x = 645
-  // - Comprimento do cilindro: 435px (x: 210 a 645)
-  //
-  // 4. Flange dos dedos (Finger Grip):
-  // - Flange oval transparente esbranquiçada em x = 645, altura 124px (y: 58 a 182)
-  // - Orifício central para a haste passar: x = 645, altura 30px
-  //
-  // 5. Êmbolo móvel LARANJA (Plunger):
-  // - Pistão de vedação LARANJA duplo lábio dentro do cilindro:
-  //   * xPistonFront = scaleZeroX + (safeUnits * scalePerUnit)
-  //   * Largura do pistão: 26px
-  //   * xPistonBack = xPistonFront + 26
-  // - Haste rígida do êmbolo (perfil cruciforme com nervuras):
-  //   * Conecta a traseira do pistão (xPistonBack) ao disco de apoio do polegar.
-  //   * Comprimento rígido constante da haste: 450px
-  //   * Em 0 UI: xPistonFront = 224, xPistonBack = 250 -> xThumbRest = 250 + 450 = 700
-  //     Como a flange está em x = 645, em 0 UI já sobram 55px de haste + 24px de disco (total ~80px)
-  //     VISÍVEIS PARA FORA da seringa à direita (pega perfeita para os dedos!).
-  //   * Em 60 UI: xPistonFront = 620, xPistonBack = 646 -> xThumbRest = 646 + 450 = 1096
-  // - Apoio de polegar (Thumb Rest) LARANJA vibrante:
-  //   * Disco laranja com nervuras antiderrapantes na extremidade direita da haste.
-  //
-  // 6. Líquido Rosa Tirzepatida:
-  // - Preenche da entrada do cilindro (x = 210) até a frente do pistão (xPistonFront).
-  // - Largura do líquido: xPistonFront - 210
   // =========================================================================
 
   const barrelCenterY = 120
@@ -111,13 +79,10 @@ export default function SyringeAnimation({
   const pistonBackX = pistonFrontX + pistonWidth
 
   // Haste rígida do êmbolo e apoio de polegar
-  // Comprimento da haste rígida: 450px
   const rodLength = 450
   const thumbBaseX = pistonBackX + rodLength
 
-  // Gerador das marcas da escala (0 a 60 UNITS):
-  // Marcas longas a cada 5 UI com numeração impressa (5, 10, ..., 50)
-  // Marcas curtas a cada 1 UI
+  // Gerador das marcas da escala comum (0 a 60 UNITS)
   const scaleMarks = useMemo(() => {
     const marks = []
     for (let u = 0; u <= 60; u += 1) {
@@ -140,8 +105,22 @@ export default function SyringeAnimation({
     return marks
   }, [scaleZeroX, scalePerUnit])
 
+  // Posições X das marcas oficiais de fracionamento
+  const officialGuideMarks = useMemo(() => {
+    return OFFICIAL_15MG_FRACTIONATION.map((item) => {
+      const x = scaleZeroX + item.units * scalePerUnit
+      const isCurrent = matchedOfficial?.units === item.units
+      return {
+        ...item,
+        x,
+        isCurrent,
+      }
+    })
+  }, [scaleZeroX, scalePerUnit, matchedOfficial])
+
   return (
-    <div className="w-full flex flex-col items-center select-none">
+    <div className="w-full flex flex-col items-center select-none space-y-4">
+      {/* CARD DA SERINGA */}
       <div className="w-full relative overflow-hidden bg-gradient-to-b from-[#FFF5F8] via-white to-[#FCE4EC]/30 rounded-3xl p-3 sm:p-5 border border-[#F9A8C9]/40 shadow-inner">
         {/* Barra superior de status e controles do modelo */}
         <div className="flex items-center justify-between px-1 sm:px-3 pb-2 text-[11px]">
@@ -150,12 +129,26 @@ export default function SyringeAnimation({
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1.5">
               <span className="text-[#1F1A1D] font-bold">Seringa de Insulina 0,5 ml | 50 UI</span>
               <span className="text-[#F43F8E] font-medium hidden sm:inline">
-                • Agulha Fixa 8 x 0,30 mm (30G)
+                • Guia Oficial de Fracionamento 15 mg
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {matchedOfficial && (
+              <span
+                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-2xs animate-fade-in"
+                style={{
+                  backgroundColor: matchedOfficial.badgeBg,
+                  color: matchedOfficial.badgeText,
+                  border: `1px solid ${matchedOfficial.border}`,
+                }}
+              >
+                <CheckCircle2 className="w-3 h-3" />
+                Ponto Exato: {matchedOfficial.label} ({matchedOfficial.units} UI)
+              </span>
+            )}
+
             <button
               type="button"
               onClick={() => setShowCap(!showCap)}
@@ -179,18 +172,37 @@ export default function SyringeAnimation({
           </div>
         </div>
 
+        {/* ALERTA MOBILE DE PONTO EXATO QUANDO ATIVO */}
+        {matchedOfficial && (
+          <div
+            className="sm:hidden mb-2 px-3 py-1.5 rounded-xl flex items-center justify-between text-xs font-bold shadow-2xs animate-fade-in"
+            style={{
+              backgroundColor: matchedOfficial.badgeBg,
+              color: matchedOfficial.badgeText,
+              border: `1px solid ${matchedOfficial.border}`,
+            }}
+          >
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Ponto exato na escala:
+            </span>
+            <span>
+              {matchedOfficial.label} ({matchedOfficial.units} UI)
+            </span>
+          </div>
+        )}
+
         {/* ÁREA CENTRAL DO DESENHO DA SERINGA NA HORIZONTAL */}
-        <div className="relative w-full flex items-center justify-center py-0.5 overflow-hidden">
+        <div className="relative w-full flex items-center justify-center py-1 overflow-visible">
           <svg
-            viewBox="0 0 1140 230"
+            viewBox="0 0 1140 240"
             preserveAspectRatio="xMidYMid meet"
-            className="w-full h-auto max-h-[170px] sm:max-h-[200px] lg:max-h-[220px] drop-shadow-md overflow-visible"
+            className="w-full h-auto max-h-[190px] sm:max-h-[220px] lg:max-h-[240px] drop-shadow-md overflow-visible"
             role="img"
             aria-label={`Seringa horizontal de insulina 0,5 ml 50 UI agulha fixa com ${safeUnits} unidades puxadas`}
           >
             <defs>
-              {/* ==================== GRADIENTES METÁLICOS E VIDRO ==================== */}
-              {/* Cânula metálica da agulha fixa ultrafina (gradiente vertical para tubo cilíndrico horizontal) */}
+              {/* ==================== GRADIENTES ==================== */}
               <linearGradient id="needleCannulaHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#94A3B8" />
                 <stop offset="35%" stopColor="#FFFFFF" />
@@ -198,7 +210,6 @@ export default function SyringeAnimation({
                 <stop offset="100%" stopColor="#64748B" />
               </linearGradient>
 
-              {/* Conexão plástica reforçada integrada (bico transparente cônico) */}
               <linearGradient id="reinforcedHubHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#E2E8F0" stopOpacity="0.9" />
                 <stop offset="25%" stopColor="#FFFFFF" stopOpacity="0.95" />
@@ -207,7 +218,6 @@ export default function SyringeAnimation({
                 <stop offset="100%" stopColor="#94A3B8" stopOpacity="0.9" />
               </linearGradient>
 
-              {/* Cilindro de vidro cristalino (vazio translúcido) */}
               <linearGradient id="glassEmptyBarrelHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#F8FAFC" stopOpacity="0.8" />
                 <stop offset="15%" stopColor="#FFFFFF" stopOpacity="0.9" />
@@ -216,7 +226,6 @@ export default function SyringeAnimation({
                 <stop offset="100%" stopColor="#CBD5E1" stopOpacity="0.8" />
               </linearGradient>
 
-              {/* Reflexo especular no vidro do cilindro (camada superior horizontal de brilho) */}
               <linearGradient id="glassSpecularShineHoriz" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0" />
                 <stop offset="10%" stopColor="#FFFFFF" stopOpacity="0.9" />
@@ -226,7 +235,6 @@ export default function SyringeAnimation({
                 <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
               </linearGradient>
 
-              {/* Líquido Tirzepatida Rosa Translúcido Vibrante */}
               <linearGradient id="liquidPinkHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#F43F8E" stopOpacity="0.9" />
                 <stop offset="20%" stopColor="#FDA4AF" stopOpacity="0.95" />
@@ -235,14 +243,11 @@ export default function SyringeAnimation({
                 <stop offset="100%" stopColor="#BE123C" stopOpacity="0.95" />
               </linearGradient>
 
-              {/* Tag flutuante gradiente rosa */}
               <linearGradient id="tagPinkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#F43F8E" />
                 <stop offset="100%" stopColor="#D63370" />
               </linearGradient>
 
-              {/* ==================== ÊMBOLO LARANJA VIBRANTE ==================== */}
-              {/* Pistão de vedação LARANJA */}
               <linearGradient id="orangePistonHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#C2410C" />
                 <stop offset="20%" stopColor="#EA580C" />
@@ -252,7 +257,6 @@ export default function SyringeAnimation({
                 <stop offset="100%" stopColor="#9A3412" />
               </linearGradient>
 
-              {/* Anel de vedação do pistão laranja */}
               <linearGradient id="orangeSealRingHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#9A3412" />
                 <stop offset="30%" stopColor="#FF7A00" />
@@ -260,7 +264,6 @@ export default function SyringeAnimation({
                 <stop offset="100%" stopColor="#7C2D12" />
               </linearGradient>
 
-              {/* Haste translúcida do êmbolo */}
               <linearGradient id="plungerTranslucentRodHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#E2E8F0" stopOpacity="0.9" />
                 <stop offset="30%" stopColor="#FFFFFF" stopOpacity="0.95" />
@@ -268,7 +271,6 @@ export default function SyringeAnimation({
                 <stop offset="100%" stopColor="#CBD5E1" stopOpacity="0.9" />
               </linearGradient>
 
-              {/* Flange / Apoio de polegar LARANJA VIBRANTE */}
               <linearGradient id="orangeThumbRestHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#9A3412" />
                 <stop offset="18%" stopColor="#EA580C" />
@@ -278,7 +280,6 @@ export default function SyringeAnimation({
                 <stop offset="100%" stopColor="#7C2D12" />
               </linearGradient>
 
-              {/* Flange para dedos na base do cilindro (transparente esbranquiçado) */}
               <linearGradient id="fingerFlangeHorizGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#CBD5E1" stopOpacity="0.9" />
                 <stop offset="30%" stopColor="#FFFFFF" stopOpacity="0.95" />
@@ -286,7 +287,6 @@ export default function SyringeAnimation({
                 <stop offset="100%" stopColor="#94A3B8" stopOpacity="0.9" />
               </linearGradient>
 
-              {/* Capa protetora laranja da agulha */}
               <linearGradient id="needleCapHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor="#C2410C" />
                 <stop offset="25%" stopColor="#EA580C" />
@@ -295,7 +295,6 @@ export default function SyringeAnimation({
                 <stop offset="100%" stopColor="#9A3412" />
               </linearGradient>
 
-              {/* Sombra suave para os elementos */}
               <filter id="syringeHorizShadow" x="-10%" y="-20%" width="125%" height="150%">
                 <feDropShadow
                   dx="2"
@@ -306,7 +305,6 @@ export default function SyringeAnimation({
                 />
               </filter>
 
-              {/* Brilho de aço cirúrgico da agulha */}
               <filter id="needleSteelGlowHoriz" x="-30%" y="-40%" width="160%" height="180%">
                 <feDropShadow
                   dx="0"
@@ -314,6 +312,16 @@ export default function SyringeAnimation({
                   stdDeviation="1.8"
                   floodColor="#38BDF8"
                   floodOpacity="0.45"
+                />
+              </filter>
+
+              <filter id="glowExactHit" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow
+                  dx="0"
+                  dy="0"
+                  stdDeviation="4"
+                  floodColor="#F43F8E"
+                  floodOpacity="0.8"
                 />
               </filter>
             </defs>
@@ -331,11 +339,9 @@ export default function SyringeAnimation({
 
             {/* ============================================================== */}
             {/* 1. ÊMBOLO MÓVEL: PISTÃO LARANJA + HASTE TRANSLÚCIDA + DISCO    */}
-            {/*    (Renderizado na camada atrás das paredes do cilindro)       */}
             {/* ============================================================== */}
             <g className="transition-all duration-200 ease-out" filter="url(#syringeHorizShadow)">
-              {/* HASTE TRANSLÚCIDA DO ÊMBOLO (Perfil cruciforme horizontal) */}
-              {/* Eixo horizontal da haste */}
+              {/* Haste translúcida */}
               <rect
                 x={pistonBackX}
                 y={barrelCenterY - 7}
@@ -346,7 +352,6 @@ export default function SyringeAnimation({
                 strokeWidth="0.8"
                 rx="2"
               />
-              {/* Nervura central horizontal de reforço */}
               <line
                 x1={pistonBackX}
                 y1={barrelCenterY}
@@ -356,7 +361,6 @@ export default function SyringeAnimation({
                 strokeWidth="2"
                 opacity="0.65"
               />
-              {/* Nervura superior de brilho */}
               <line
                 x1={pistonBackX}
                 y1={barrelCenterY - 3.5}
@@ -366,7 +370,6 @@ export default function SyringeAnimation({
                 strokeWidth="1.2"
                 opacity="0.85"
               />
-              {/* Nervuras transversais da haste plástica */}
               {[45, 95, 145, 195, 245, 295, 345, 395, 430].map((offset) => {
                 const ribX = pistonBackX + offset
                 if (ribX >= thumbBaseX - 10) return null
@@ -386,9 +389,8 @@ export default function SyringeAnimation({
                 )
               })}
 
-              {/* APOIO DO POLEGAR LARANJA VIBRANTE (THUMB REST - EXTREMIDADE DIREITA) */}
+              {/* APOIO DO POLEGAR LARANJA VIBRANTE */}
               <g>
-                {/* Garganta / encaixe cilíndrico que conecta a haste ao disco laranja */}
                 <rect
                   x={thumbBaseX - 12}
                   y={barrelCenterY - 13}
@@ -399,7 +401,6 @@ export default function SyringeAnimation({
                   stroke="#9A3412"
                   strokeWidth="0.8"
                 />
-                {/* Flange / disco largo de apoio do polegar em laranja vibrante */}
                 <rect
                   x={thumbBaseX}
                   y={barrelCenterY - 32}
@@ -410,7 +411,6 @@ export default function SyringeAnimation({
                   stroke="#9A3412"
                   strokeWidth="1.4"
                 />
-                {/* Linha de brilho superior no disco laranja */}
                 <rect
                   x={thumbBaseX + 2.5}
                   y={barrelCenterY - 28}
@@ -420,7 +420,6 @@ export default function SyringeAnimation({
                   fill="#FFA62B"
                   opacity="0.85"
                 />
-                {/* Borda direita com sombra */}
                 <line
                   x1={thumbBaseX + 15}
                   y1={barrelCenterY - 28}
@@ -429,7 +428,6 @@ export default function SyringeAnimation({
                   stroke="#7C2D12"
                   strokeWidth="1.4"
                 />
-                {/* Nervuras antiderrapantes para o polegar / dedos */}
                 <line
                   x1={thumbBaseX + 7.5}
                   y1={barrelCenterY - 20}
@@ -452,9 +450,8 @@ export default function SyringeAnimation({
                 />
               </g>
 
-              {/* PISTÃO DE VEDAÇÃO LARANJA VIBRANTE DENTRO DO CILINDRO */}
+              {/* PISTÃO DE VEDAÇÃO LARANJA VIBRANTE */}
               <g>
-                {/* Corpo do pistão de borracha laranja */}
                 <rect
                   x={pistonFrontX}
                   y={barrelTop + 1.5}
@@ -465,7 +462,6 @@ export default function SyringeAnimation({
                   strokeWidth="1"
                   rx="2"
                 />
-                {/* Lábio frontal de vedação (alinhado rigorosamente à leitura da dose) */}
                 <rect
                   x={pistonFrontX}
                   y={barrelTop + 1}
@@ -474,7 +470,6 @@ export default function SyringeAnimation({
                   fill="url(#orangeSealRingHorizGrad)"
                   rx="1"
                 />
-                {/* Aresta frontal calibrada com brilho */}
                 <line
                   x1={pistonFrontX + 1}
                   y1={barrelTop + 2}
@@ -483,7 +478,6 @@ export default function SyringeAnimation({
                   stroke="#FFA62B"
                   strokeWidth="1.2"
                 />
-                {/* Canal central de lubrificação entre os lábios de vedação */}
                 <rect
                   x={pistonFrontX + 9}
                   y={barrelTop + 3}
@@ -493,7 +487,6 @@ export default function SyringeAnimation({
                   opacity="0.5"
                   rx="1"
                 />
-                {/* Lábio traseiro de vedação */}
                 <rect
                   x={pistonFrontX + 20}
                   y={barrelTop + 1}
@@ -502,7 +495,6 @@ export default function SyringeAnimation({
                   fill="url(#orangeSealRingHorizGrad)"
                   rx="1"
                 />
-                {/* Reflexo horizontal no pistão laranja */}
                 <rect
                   x={pistonFrontX + 2}
                   y={barrelCenterY - 9}
@@ -518,7 +510,6 @@ export default function SyringeAnimation({
             {/* ============================================================== */}
             {/* 2. CILINDRO PRINCIPAL: CORPO DE VIDRO TRANSLÚCIDO              */}
             {/* ============================================================== */}
-            {/* Fundo interno vazio do cilindro */}
             <rect
               x={barrelStartX}
               y={barrelTop}
@@ -536,7 +527,6 @@ export default function SyringeAnimation({
             <g className="transition-all duration-200 ease-out">
               {liquidWidth > 0 && (
                 <>
-                  {/* Coluna de líquido rosa */}
                   <rect
                     x={barrelStartX + 1.5}
                     y={barrelTop + 1.5}
@@ -544,8 +534,6 @@ export default function SyringeAnimation({
                     height={barrelHeight - 3}
                     fill="url(#liquidPinkHorizGrad)"
                   />
-
-                  {/* Reflexo superior brilhante no líquido */}
                   <rect
                     x={barrelStartX + 2}
                     y={barrelTop + 3}
@@ -554,8 +542,6 @@ export default function SyringeAnimation({
                     fill="#FFFFFF"
                     opacity="0.45"
                   />
-
-                  {/* Menisco nítido na interface líquido / pistão */}
                   <line
                     x1={pistonFrontX}
                     y1={barrelTop + 2}
@@ -566,7 +552,7 @@ export default function SyringeAnimation({
                     opacity="0.85"
                   />
 
-                  {/* Microbolhas animadas no líquido */}
+                  {/* Microbolhas animadas */}
                   {safeUnits > 6 && (
                     <g className="pointer-events-none">
                       <circle
@@ -600,10 +586,9 @@ export default function SyringeAnimation({
             </g>
 
             {/* ============================================================== */}
-            {/* 4. CONEXÃO REFORÇADA INTEGRADA AO CILINDRO (BICO DA AGULHA)    */}
+            {/* 4. CONEXÃO REFORÇADA INTEGRADA AO CILINDRO                     */}
             {/* ============================================================== */}
             <g filter="url(#syringeHorizShadow)">
-              {/* Ombros curvos do cilindro que convergem para o cone */}
               <path
                 d={`M ${barrelStartX} ${barrelTop}
                     Q ${barrelStartX - 10} ${barrelTop + 6} ${barrelStartX - 14} ${barrelCenterY - 14}
@@ -613,8 +598,6 @@ export default function SyringeAnimation({
                 stroke="#94A3B8"
                 strokeWidth="1.2"
               />
-
-              {/* Colar cilíndrico intermediário reforçado */}
               <rect
                 x="172"
                 y={barrelCenterY - 14}
@@ -625,7 +608,6 @@ export default function SyringeAnimation({
                 stroke="#94A3B8"
                 strokeWidth="1.1"
               />
-              {/* Anéis de reforço no colar plástico */}
               <line
                 x1="178"
                 y1={barrelCenterY - 14}
@@ -642,16 +624,12 @@ export default function SyringeAnimation({
                 stroke="#94A3B8"
                 strokeWidth="0.8"
               />
-
-              {/* Cone afilado esquerdo onde a agulha fixa fica cravada */}
               <polygon
                 points={`172,${barrelCenterY - 10} 145,${barrelCenterY - 5} 145,${barrelCenterY + 5} 172,${barrelCenterY + 10}`}
                 fill="url(#reinforcedHubHorizGrad)"
                 stroke="#94A3B8"
                 strokeWidth="1"
               />
-
-              {/* Guia metálica interna da cânula fixa */}
               <rect
                 x="145"
                 y={barrelCenterY - 2}
@@ -667,7 +645,6 @@ export default function SyringeAnimation({
             {/* 5. AGULHA FIXA ULTRAFINA (8 x 0,30 mm / 30G)                   */}
             {/* ============================================================== */}
             <g>
-              {/* Brilho de aço cirúrgico da cânula */}
               <line
                 x1="40"
                 y1={barrelCenterY}
@@ -678,8 +655,6 @@ export default function SyringeAnimation({
                 opacity="0.45"
                 filter="url(#needleSteelGlowHoriz)"
               />
-
-              {/* Cânula metálica ultrafina principal */}
               <line
                 x1="40"
                 y1={barrelCenterY}
@@ -689,8 +664,6 @@ export default function SyringeAnimation({
                 strokeWidth="1.9"
                 strokeLinecap="round"
               />
-
-              {/* Linha de reflexo especular polido na agulha */}
               <line
                 x1="44"
                 y1={barrelCenterY - 0.4}
@@ -700,8 +673,6 @@ export default function SyringeAnimation({
                 strokeWidth="0.7"
                 opacity="0.95"
               />
-
-              {/* Bisel trifacetado na ponta (corte cirúrgico voltado para a esquerda) */}
               <polygon
                 points={`40,${barrelCenterY} 48,${barrelCenterY - 1.2} 48,${barrelCenterY + 1.2}`}
                 fill="url(#needleCannulaHorizGrad)"
@@ -713,8 +684,6 @@ export default function SyringeAnimation({
                 fill="#FFFFFF"
                 opacity="0.9"
               />
-
-              {/* Microgota de Tirzepatida pulsando na ponta da agulha quando carregada */}
               {safeUnits > 0 && !showCap && (
                 <g className="animate-pulse">
                   <ellipse
@@ -731,12 +700,10 @@ export default function SyringeAnimation({
             </g>
 
             {/* ============================================================== */}
-            {/* 6. TAMPA PROTETORA LARANJA (COBRE AGULHA OU REPOUSA AO LADO)   */}
+            {/* 6. TAMPA PROTETORA LARANJA                                     */}
             {/* ============================================================== */}
             {showCap ? (
-              /* Tampa colocada sobre a agulha */
               <g filter="url(#syringeHorizShadow)" className="transition-all duration-300">
-                {/* Tampa protetora cilíndrica horizontal */}
                 <rect
                   x="30"
                   y={barrelCenterY - 9}
@@ -747,7 +714,6 @@ export default function SyringeAnimation({
                   stroke="#9A3412"
                   strokeWidth="1"
                 />
-                {/* Flange traseira da tampa junto ao bico */}
                 <rect
                   x="134"
                   y={barrelCenterY - 13}
@@ -758,7 +724,6 @@ export default function SyringeAnimation({
                   stroke="#9A3412"
                   strokeWidth="1"
                 />
-                {/* Ranhuras horizontais de aderência */}
                 <line
                   x1="38"
                   y1={barrelCenterY - 4}
@@ -798,7 +763,6 @@ export default function SyringeAnimation({
                 </text>
               </g>
             ) : (
-              /* Tampa repousando acima da agulha (indicador compacto clicável) */
               <g
                 transform="translate(45, 36)"
                 filter="url(#syringeHorizShadow)"
@@ -850,9 +814,8 @@ export default function SyringeAnimation({
             )}
 
             {/* ============================================================== */}
-            {/* 7. PAREDES DE VIDRO EXTERNAS DO CILINDRO E FLANGE DOS DEDOS    */}
+            {/* 7. PAREDES DE VIDRO EXTERNAS E FLANGE DOS DEDOS                */}
             {/* ============================================================== */}
-            {/* Parede de vidro com contorno nítido */}
             <rect
               x={barrelStartX}
               y={barrelTop}
@@ -864,9 +827,7 @@ export default function SyringeAnimation({
               rx="3"
             />
 
-            {/* FLANGE PARA OS DEDOS (FINGER GRIP) NA EXTREMIDADE DIREITA DO CILINDRO (X = 645) */}
             <g filter="url(#syringeHorizShadow)">
-              {/* Colar traseiro que segura a flange */}
               <rect
                 x={barrelEndX - 4}
                 y={barrelCenterY - 22}
@@ -877,7 +838,6 @@ export default function SyringeAnimation({
                 stroke="#94A3B8"
                 strokeWidth="1"
               />
-              {/* Orifício central por onde a haste desliza para fora */}
               <ellipse
                 cx={barrelEndX + 6}
                 cy={barrelCenterY}
@@ -887,7 +847,6 @@ export default function SyringeAnimation({
                 stroke="#94A3B8"
                 strokeWidth="1"
               />
-              {/* Flange oval plana larga da foto (apoio para os dedos indicador e médio) */}
               <path
                 d={`M ${barrelEndX + 6} ${barrelCenterY - 60}
                     C ${barrelEndX + 1} ${barrelCenterY - 60}, ${barrelEndX - 2} ${barrelCenterY - 30}, ${barrelEndX - 2} ${barrelCenterY}
@@ -906,7 +865,6 @@ export default function SyringeAnimation({
                 fill="#FFFFFF"
                 fillOpacity="0.5"
               />
-              {/* Brilhos plásticos na flange */}
               <line
                 x1={barrelEndX + 6}
                 y1={barrelCenterY - 50}
@@ -928,10 +886,9 @@ export default function SyringeAnimation({
             </g>
 
             {/* ============================================================== */}
-            {/* 8. ESCALA GRADUADA IMPRESSA NO CILINDRO (5 A 50 UNITS + 60)   */}
+            {/* 8. ESCALA GRADUADA BÁSICA (0 a 60 UI)                          */}
             {/* ============================================================== */}
             <g className="pointer-events-none select-none">
-              {/* Linha horizontal mestra da escala no topo interno do cilindro */}
               <line
                 x1={scaleZeroX}
                 y1={barrelTop + 8}
@@ -941,7 +898,6 @@ export default function SyringeAnimation({
                 strokeWidth="1.2"
               />
 
-              {/* Traço e marca 0 (início) */}
               <line
                 x1={scaleZeroX}
                 y1={barrelTop + 8}
@@ -963,7 +919,6 @@ export default function SyringeAnimation({
                 0
               </text>
 
-              {/* Graduações de 1 a 60 */}
               {scaleMarks.map((mark) => {
                 if (mark.unit === 0) return null
 
@@ -972,7 +927,6 @@ export default function SyringeAnimation({
 
                 return (
                   <g key={mark.unit} opacity={markOpacity}>
-                    {/* Traço da escala apontando para baixo (para o interior do cilindro) */}
                     <line
                       x1={mark.x}
                       y1={barrelTop + 8}
@@ -983,7 +937,6 @@ export default function SyringeAnimation({
                       strokeLinecap="square"
                     />
 
-                    {/* Números da escala (5, 10, 15, ..., 50) */}
                     {mark.isLabeled && (
                       <text
                         x={mark.x}
@@ -999,7 +952,6 @@ export default function SyringeAnimation({
                       </text>
                     )}
 
-                    {/* Marca discreta de 60 unidades para o limite do app */}
                     {mark.unit === 60 && (
                       <text
                         x={mark.x}
@@ -1017,7 +969,6 @@ export default function SyringeAnimation({
                 )
               })}
 
-              {/* RÓTULO "UNITS • 0,5 ml" IMPRESSO NO CORPO DO CILINDRO */}
               <text
                 x={(scaleZeroX + scale50X) / 2}
                 y={barrelBottom - 7}
@@ -1033,7 +984,78 @@ export default function SyringeAnimation({
             </g>
 
             {/* ============================================================== */}
-            {/* 9. REFLEXO CRISTALINO ESPECULAR DO VIDRO (SOBREPOSTO À ESCALA) */}
+            {/* 8.1 MARCAS OFICIAIS DE FRACIONAMENTO COLORIDAS NA ESCALA       */}
+            {/*     (Elemento-chave: 8, 17, 25, 33, 42, 50 UI coloridos)       */}
+            {/* ============================================================== */}
+            <g className="select-none pointer-events-none">
+              {officialGuideMarks.map((guide) => {
+                const isSelected = guide.isCurrent
+
+                return (
+                  <g key={guide.mg} className="transition-all duration-200">
+                    {/* Linha vertical colorida de destaque que cruza a escala */}
+                    <line
+                      x1={guide.x}
+                      y1={barrelTop + 4}
+                      x2={guide.x}
+                      y2={barrelTop + (isSelected ? 30 : 20)}
+                      stroke={guide.color}
+                      strokeWidth={isSelected ? 2.8 : 1.8}
+                      strokeLinecap="round"
+                      opacity={isSelected ? 1 : 0.85}
+                    />
+
+                    {/* Triângulo / indicador no topo da escala apontando para a marca exata */}
+                    <polygon
+                      points={`${guide.x - 3.5},${barrelTop + 3} ${guide.x + 3.5},${barrelTop + 3} ${guide.x},${barrelTop + 7}`}
+                      fill={guide.color}
+                    />
+
+                    {/* Pequena tag com a dosagem em mg acima do cilindro */}
+                    <g transform={`translate(${guide.x}, ${barrelTop - 12})`}>
+                      <rect
+                        x="-15"
+                        y="-10"
+                        width="30"
+                        height="12"
+                        rx="3"
+                        fill={isSelected ? guide.color : '#FFFFFF'}
+                        stroke={guide.color}
+                        strokeWidth={isSelected ? 1.5 : 1}
+                        opacity={isSelected ? 1 : 0.9}
+                      />
+                      <text
+                        x="0"
+                        y="-1.5"
+                        textAnchor="middle"
+                        fill={isSelected ? '#FFFFFF' : guide.color}
+                        fontSize="7"
+                        fontWeight="800"
+                        fontFamily="Poppins, sans-serif"
+                      >
+                        {guide.label}
+                      </text>
+                    </g>
+
+                    {/* Efeito de anel pulsante quando coincide com a dose atual */}
+                    {isSelected && (
+                      <circle
+                        cx={guide.x}
+                        cy={barrelTop + 8}
+                        r="5"
+                        fill="none"
+                        stroke={guide.color}
+                        strokeWidth="1.5"
+                        className="animate-ping opacity-75"
+                      />
+                    )}
+                  </g>
+                )
+              })}
+            </g>
+
+            {/* ============================================================== */}
+            {/* 9. REFLEXO CRISTALINO ESPECULAR DO VIDRO                       */}
             {/* ============================================================== */}
             <rect
               x={barrelStartX}
@@ -1047,7 +1069,7 @@ export default function SyringeAnimation({
 
             {/* ============================================================== */}
             {/* 10. TAG FLUTUANTE DE DOSE COM INDICADOR EM TEMPO REAL          */}
-            {/*     (Posicionada na horizontal alinhada com o menisco/pistão)  */}
+            {/*     (Com destaque de "Ponto exato" nas doses oficiais)         */}
             {/* ============================================================== */}
             <g
               className="transition-all duration-200 ease-out pointer-events-none"
@@ -1059,62 +1081,97 @@ export default function SyringeAnimation({
                 y1={barrelBottom - 2}
                 x2="0"
                 y2={barrelBottom + 16}
-                stroke="#F43F8E"
-                strokeWidth="2.2"
-                strokeDasharray="3 2"
+                stroke={matchedOfficial ? matchedOfficial.color : '#F43F8E'}
+                strokeWidth={matchedOfficial ? '2.8' : '2.2'}
+                strokeDasharray={matchedOfficial ? 'none' : '3 2'}
               />
 
               {/* Pílula flutuante estilizada logo abaixo do nível do pistão */}
-              <g transform="translate(-75, 172)" filter="url(#syringeHorizShadow)">
+              <g
+                transform={`translate(-85, 172)`}
+                filter={isExactHit ? 'url(#glowExactHit)' : 'url(#syringeHorizShadow)'}
+              >
                 {/* Borda da pílula */}
                 <rect
                   x="0"
                   y="0"
-                  width="150"
-                  height="34"
-                  rx="17"
+                  width="170"
+                  height="36"
+                  rx="18"
                   fill="#FFFFFF"
-                  stroke="#F43F8E"
-                  strokeWidth="2"
+                  stroke={matchedOfficial ? matchedOfficial.color : '#F43F8E'}
+                  strokeWidth={matchedOfficial ? 2.5 : 2}
                 />
                 {/* Fundo colorido na tag */}
-                <rect x="3" y="3" width="144" height="28" rx="14" fill="url(#tagPinkGrad)" />
+                <rect
+                  x="3"
+                  y="3"
+                  width="164"
+                  height="30"
+                  rx="15"
+                  fill={matchedOfficial ? matchedOfficial.color : 'url(#tagPinkGrad)'}
+                />
                 {/* Texto da dose */}
                 <text
-                  x="72"
-                  y="21"
+                  x="85"
+                  y="18"
                   textAnchor="middle"
                   fill="#FFFFFF"
-                  fontSize={mlEquivalent !== undefined ? '10' : '12'}
+                  fontSize="11"
                   fontWeight="800"
                   fontFamily="Poppins, sans-serif"
                 >
                   {safeUnits % 1 === 0 ? safeUnits : safeUnits.toFixed(1)} UI
                   {mgEquivalent !== undefined ? ` • ${mgEquivalent} mg` : ''}
-                  {mlEquivalent !== undefined ? ` • ${mlEquivalent.toFixed(2)} ml` : ''}
+                </text>
+                <text
+                  x="85"
+                  y="28"
+                  textAnchor="middle"
+                  fill="#FFFFFF"
+                  fontSize="8"
+                  fontWeight="700"
+                  fontFamily="Poppins, sans-serif"
+                  opacity="0.95"
+                >
+                  {matchedOfficial
+                    ? `★ PONTO EXATO (${matchedOfficial.label})`
+                    : mlEquivalent !== undefined
+                      ? `${mlEquivalent.toFixed(2)} ml`
+                      : ''}
                 </text>
 
                 {/* Seta do balão apontando para a linha do menisco */}
-                <polygon points="70,-4 75,0 80,-4" fill="#F43F8E" />
+                <polygon
+                  points="80,-5 85,0 90,-5"
+                  fill={matchedOfficial ? matchedOfficial.color : '#F43F8E'}
+                />
               </g>
 
               {/* Marcador pulsante pontual exatamente no menisco/vedação */}
               <circle
                 cx="0"
                 cy={barrelCenterY}
-                r="3.5"
-                fill="#F43F8E"
+                r="4"
+                fill={matchedOfficial ? matchedOfficial.color : '#F43F8E'}
                 stroke="#FFFFFF"
-                strokeWidth="1.5"
+                strokeWidth="1.8"
                 className="animate-ping"
               />
-              <circle cx="0" cy={barrelCenterY} r="3" fill="#F43F8E" />
+              <circle
+                cx="0"
+                cy={barrelCenterY}
+                r="3.5"
+                fill={matchedOfficial ? matchedOfficial.color : '#F43F8E'}
+                stroke="#FFFFFF"
+                strokeWidth="1"
+              />
             </g>
           </svg>
         </div>
 
         {/* ============================================================== */}
-        {/* LEGENDA E DESTAQUES DO MODELO DE AGULHA FIXA (CONFORME FOTO)   */}
+        {/* LEGENDA E DESTAQUES DO MODELO DE AGULHA FIXA                   */}
         {/* ============================================================== */}
         <div className="mt-2 pt-3 border-t border-[#F9A8C9]/30 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
           <div className="p-2 rounded-xl bg-white/70 border border-[#F9A8C9]/30 shadow-2xs">
@@ -1145,9 +1202,93 @@ export default function SyringeAnimation({
               Zero Vazamento
             </span>
             <span className="text-xs font-black text-[#F43F8E] flex items-center justify-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" /> Caneca Flexível
+              <Sparkles className="w-3.5 h-3.5" /> Menisco Rosa
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* ============================================================== */}
+      {/* PAINEL-LEGENDA: FRACIONAMENTO OFICIAL DA AMPOLA DE 15mg/0,5ml   */}
+      {/*     (Exatamente conforme a imagem de referência do usuário)     */}
+      {/* ============================================================== */}
+      <div className="w-full bg-white rounded-2xl p-3.5 sm:p-4 border border-[#E5E7EB] shadow-2xs space-y-2.5">
+        <div className="flex items-center justify-between flex-wrap gap-1.5 pb-2 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+              <Info className="w-3.5 h-3.5" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-bold text-[#1F1A1D]">
+                Fracionamento ampola de 15mg/0,5ml
+              </h3>
+              <p className="text-[11px] text-[#6B7280]">
+                Seringa de 50 UI • Toque em uma dose para marcar o ponto exato na seringa:
+              </p>
+            </div>
+          </div>
+
+          {matchedOfficial && (
+            <span
+              className="text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+              style={{
+                backgroundColor: matchedOfficial.badgeBg,
+                color: matchedOfficial.badgeText,
+                border: `1px solid ${matchedOfficial.border}`,
+              }}
+            >
+              Dose selecionada: {matchedOfficial.label}
+            </span>
+          )}
+        </div>
+
+        {/* Grade com as 6 doses oficiais da referência */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+          {OFFICIAL_15MG_FRACTIONATION.map((item) => {
+            const isSelected = matchedOfficial?.units === item.units
+
+            return (
+              <button
+                key={item.mg}
+                type="button"
+                onClick={() => onSelectOfficialDose && onSelectOfficialDose(item)}
+                className={cn(
+                  'p-2.5 rounded-xl border text-center transition-all duration-150 btn-tap-scale cursor-pointer flex flex-col items-center justify-between gap-1',
+                  isSelected ? 'ring-2 ring-offset-1 shadow-sm' : 'hover:bg-gray-50',
+                )}
+                style={{
+                  backgroundColor: isSelected ? item.badgeBg : '#FFFFFF',
+                  borderColor: isSelected ? item.color : item.border,
+                }}
+              >
+                {/* Linha colorida indicativa */}
+                <span
+                  className="w-full h-1 rounded-full mb-0.5"
+                  style={{ backgroundColor: item.color }}
+                />
+
+                <span className="text-xs font-black tracking-tight" style={{ color: item.color }}>
+                  {item.label}
+                </span>
+
+                <span
+                  className={cn(
+                    'text-[11px] font-bold px-2 py-0.5 rounded-md',
+                    isSelected ? 'bg-white shadow-2xs' : 'bg-gray-100 text-gray-700',
+                  )}
+                  style={{ color: isSelected ? item.badgeText : undefined }}
+                >
+                  {item.units < 10 ? `0${item.units}` : item.units} UI
+                </span>
+
+                {isSelected && (
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#16A34A] flex items-center gap-0.5">
+                    <CheckCircle2 className="w-2.5 h-2.5" /> Ponto exato
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
     </div>
