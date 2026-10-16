@@ -458,7 +458,7 @@ export default function Doses() {
               <tr className="border-b border-[#FCE4EC] text-[#6B7280]">
                 <th className="py-2.5 px-3 font-semibold">Data / Hora</th>
                 <th className="py-2.5 px-3 font-semibold">Dose em mg</th>
-                <th className="py-2.5 px-3 font-semibold">Seringa (U-100)</th>
+                <th className="py-2.5 px-3 font-semibold">Seringa (UI)</th>
                 <th className="py-2.5 px-3 font-semibold">Local</th>
                 <th className="py-2.5 px-3 font-semibold">Observações</th>
               </tr>
