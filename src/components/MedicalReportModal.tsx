@@ -115,11 +115,16 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs animate-fade-in overflow-y-auto print:p-0 print:bg-white print:static print:inset-auto">
-      <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-[#FCE4EC] my-auto space-y-6 max-h-[92vh] overflow-y-auto print:max-h-none print:shadow-none print:border-none print:m-0 print:p-4">
+      <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl border border-(--primary-subtle-border) my-auto space-y-6 max-h-[92vh] overflow-y-auto print:max-h-none print:shadow-none print:border-none print:m-0 print:p-4">
         {/* BARRA SUPERIOR (OCULTA NA IMPRESSÃO) */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#FCE4EC] print:hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-(--primary-subtle-border) print:hidden">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#F43F8E] to-[#D63370] text-white flex items-center justify-center shadow-md">
+            <div
+              style={{
+                background: `linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%)`,
+              }}
+              className="w-10 h-10 rounded-2xl text-white flex items-center justify-center shadow-md"
+            >
               <FileText className="w-5 h-5" />
             </div>
             <div>
@@ -137,7 +142,9 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
                 type="button"
                 onClick={() => setPeriod('7days')}
                 className={`px-2.5 py-1.5 rounded-lg transition ${
-                  period === '7days' ? 'bg-[#F43F8E] text-white' : 'text-gray-600 hover:text-black'
+                  period === '7days'
+                    ? 'bg-(--primary-color) text-white'
+                    : 'text-gray-600 hover:text-black'
                 }`}
               >
                 7 dias
@@ -146,7 +153,9 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
                 type="button"
                 onClick={() => setPeriod('30days')}
                 className={`px-2.5 py-1.5 rounded-lg transition ${
-                  period === '30days' ? 'bg-[#F43F8E] text-white' : 'text-gray-600 hover:text-black'
+                  period === '30days'
+                    ? 'bg-(--primary-color) text-white'
+                    : 'text-gray-600 hover:text-black'
                 }`}
               >
                 30 dias
@@ -155,7 +164,9 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
                 type="button"
                 onClick={() => setPeriod('90days')}
                 className={`px-2.5 py-1.5 rounded-lg transition ${
-                  period === '90days' ? 'bg-[#F43F8E] text-white' : 'text-gray-600 hover:text-black'
+                  period === '90days'
+                    ? 'bg-(--primary-color) text-white'
+                    : 'text-gray-600 hover:text-black'
                 }`}
               >
                 90 dias
@@ -164,7 +175,9 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
                 type="button"
                 onClick={() => setPeriod('all')}
                 className={`px-2.5 py-1.5 rounded-lg transition ${
-                  period === 'all' ? 'bg-[#F43F8E] text-white' : 'text-gray-600 hover:text-black'
+                  period === 'all'
+                    ? 'bg-(--primary-color) text-white'
+                    : 'text-gray-600 hover:text-black'
                 }`}
               >
                 Tudo
@@ -174,7 +187,7 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
             <button
               type="button"
               onClick={handlePrint}
-              className="px-4 py-2 bg-[#F43F8E] hover:bg-[#D63370] text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-1.5 transition"
+              className="px-4 py-2 bg-(--primary-color) hover:bg-(--primary-hover) text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-1.5 transition"
             >
               <Printer className="w-4 h-4" />
               <span>Imprimir / PDF</span>
@@ -193,11 +206,13 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
         {/* CORPO DO RELATÓRIO IMPRESSO / VISUALIZADO */}
         <div className="space-y-6 text-[#1F1A1D] print:space-y-4">
           {/* CABEÇALHO CLÍNICO DO RELATÓRIO */}
-          <div className="flex items-start justify-between border-b-2 border-[#F43F8E] pb-4">
+          <div className="flex items-start justify-between border-b-2 border-(--primary-color) pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-black text-[#F43F8E] tracking-tight">TEREZA</span>
-                <span className="text-xs px-2 py-0.5 rounded-md bg-[#FCE4EC] text-[#F43F8E] font-bold">
+                <span className="text-2xl font-black text-(--primary-color) tracking-tight">
+                  TEREZA
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded-md bg-(--primary-subtle) text-(--primary-color) font-bold">
                   Relatório Clínico de Acompanhamento
                 </span>
               </div>
@@ -241,7 +256,7 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
             </div>
             <div>
               <span className="text-gray-500 block">Dose prescrita atual:</span>
-              <strong className="text-[#F43F8E]">
+              <strong className="text-(--primary-color)">
                 Caneta {profile.currentPenMg || 15} mg (
                 {profile.customConcentrationMgMl || (profile.currentPenMg || 15) / 0.5} mg/ml)
               </strong>
@@ -250,7 +265,7 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
 
           {/* RESUMO EXECUTIVO: PESO, IMC E VARIAÇÃO */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FFF5F8] to-[#FCE4EC]/50 border border-[#F9A8C9]/50">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-white to-(--primary-subtle)/50 border border-(--primary-subtle-border)">
               <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide block">
                 Evolução do Peso
               </span>
@@ -272,12 +287,12 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FFF5F8] to-[#FCE4EC]/50 border border-[#F9A8C9]/50">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-white to-(--primary-subtle)/50 border border-(--primary-subtle-border)">
               <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide block">
                 Índice de Massa Corporal (IMC)
               </span>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-2xl font-black text-[#F43F8E]">
+                <span className="text-2xl font-black text-(--primary-color)">
                   {formatNumberBr(filteredData.currentIMC, 1)}
                 </span>
                 <span className="text-xs text-gray-500">
@@ -289,7 +304,7 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FFF5F8] to-[#FCE4EC]/50 border border-[#F9A8C9]/50">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-white to-(--primary-subtle)/50 border border-(--primary-subtle-border)">
               <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide block">
                 Hidratação Média Registrada
               </span>
@@ -310,7 +325,7 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
           {/* TABELA 1: DOSES APLICADAS NO PERÍODO */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Syringe className="w-4 h-4 text-[#F43F8E]" />
+              <Syringe className="w-4 h-4 text-(--primary-color)" />
               <h3 className="font-bold text-sm text-[#1F1A1D]">
                 Registro de Doses Aplicadas ({filteredData.doses.length} injeções)
               </h3>
@@ -338,7 +353,7 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
                       <tr key={d.id} className="hover:bg-gray-50">
                         <td className="py-2 px-3 font-medium">{formatDateBr(d.date)}</td>
                         <td className="py-2 px-3 text-gray-600">{d.time}</td>
-                        <td className="py-2 px-3 font-bold text-[#F43F8E]">
+                        <td className="py-2 px-3 font-bold text-(--primary-color)">
                           {formatNumberBr(d.mgDose || calculateMgFromUnits(d.units), 1)} mg
                         </td>
                         <td className="py-2 px-3 font-semibold">{d.units} un</td>
@@ -357,7 +372,7 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
           {/* TABELA 2: HISTÓRICO DE PESAGENS */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Scale className="w-4 h-4 text-[#F43F8E]" />
+              <Scale className="w-4 h-4 text-(--primary-color)" />
               <h3 className="font-bold text-sm text-[#1F1A1D]">
                 Histórico de Medições de Peso & Composição Corporal
               </h3>
@@ -452,7 +467,7 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
           {filteredData.diary.length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-[#F43F8E]" />
+                <BookOpen className="w-4 h-4 text-(--primary-color)" />
                 <h3 className="font-bold text-sm text-[#1F1A1D]">
                   Relatos e Observações do Paciente
                 </h3>

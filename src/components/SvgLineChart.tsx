@@ -45,7 +45,7 @@ export default function SvgLineChart({
           {subtitle && <p className="text-xs text-[#6B7280]">{subtitle}</p>}
         </div>
         <div className="py-12 flex flex-col items-center justify-center text-center space-y-2 bg-[#F7F4F6] rounded-2xl">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#F43F8E] shadow-xs">
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-(--primary-color) shadow-xs">
             📈
           </div>
           <p className="text-xs font-semibold text-gray-700">
@@ -109,7 +109,7 @@ export default function SvgLineChart({
           <h3 className="font-bold text-base text-[#1F1A1D]">{title}</h3>
           {subtitle && <p className="text-xs text-[#6B7280]">{subtitle}</p>}
         </div>
-        <div className="text-xs font-bold text-[#F43F8E]">
+        <div className="text-xs font-bold text-(--primary-color)">
           Último: {formatNumberBr(sortedData[sortedData.length - 1].value, 1)} {unit}
         </div>
       </div>

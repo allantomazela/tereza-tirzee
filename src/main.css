@@ -90,19 +90,36 @@
 }
 
 @layer utilities {
-  .bg-pink-core {
+  .bg-pink-core,
+  .bg-theme-core {
     background-color: var(--primary-color);
   }
-  .bg-pink-hover {
+  .bg-pink-hover,
+  .bg-theme-hover {
     background-color: var(--primary-hover);
   }
-  .text-pink-core {
+  .bg-theme-subtle {
+    background-color: var(--primary-subtle);
+  }
+  .bg-theme-light {
+    background-color: var(--primary-light);
+  }
+  .text-pink-core,
+  .text-theme-core {
     color: var(--primary-color);
   }
-  .border-pink-core {
+  .text-theme-hover {
+    color: var(--primary-hover);
+  }
+  .border-pink-core,
+  .border-theme-core {
     border-color: var(--primary-color);
   }
-  .ring-pink-core {
+  .border-theme-subtle {
+    border-color: var(--primary-subtle-border);
+  }
+  .ring-pink-core,
+  .ring-theme-core {
     --tw-ring-color: var(--primary-color);
   }
 

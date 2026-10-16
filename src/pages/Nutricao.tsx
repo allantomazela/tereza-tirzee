@@ -150,7 +150,7 @@ export default function Nutricao() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-[#F7F4F6] transition"
             title="Alterar meta de água"
           >
-            <Settings2 className="w-3.5 h-3.5 text-[#F43F8E]" />
+            <Settings2 className="w-3.5 h-3.5 text-(--primary-color)" />
             <span className="hidden sm:inline">Meta: {formatNumberBr(goalWaterMl / 1000, 1)}L</span>
           </button>
         </div>
@@ -162,7 +162,7 @@ export default function Nutricao() {
             {/* Splash animado em volta da garrafa */}
             {splashEffect && (
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <div className="w-36 h-36 rounded-full border-4 border-[#F43F8E]/40 animate-ping" />
+                <div className="w-36 h-36 rounded-full border-4 border-(--primary-color)/40 animate-ping" />
               </div>
             )}
           </div>
@@ -174,7 +174,7 @@ export default function Nutricao() {
                 <span
                   className={cn(
                     'text-4xl sm:text-5xl font-black tracking-tight transition-colors',
-                    isGoalReached ? 'text-[#16A34A]' : 'text-[#F43F8E]',
+                    isGoalReached ? 'text-[#16A34A]' : 'text-(--primary-color)',
                   )}
                 >
                   {formatNumberBr(currentWaterMl / 1000, 2)} L
@@ -206,7 +206,7 @@ export default function Nutricao() {
                 <button
                   type="button"
                   onClick={() => handleAddWater(250)}
-                  className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-[#FCE4EC] hover:bg-[#F9A8C9]/60 text-[#F43F8E] flex flex-col items-center justify-center gap-1 shadow-sm btn-tap-scale transition-all"
+                  className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-(--primary-subtle) hover:bg-(--primary-light)/40 text-(--primary-color) flex flex-col items-center justify-center gap-1 shadow-sm btn-tap-scale transition-all"
                 >
                   <Droplets className="w-4 h-4" />
                   <span className="text-xs font-bold">+250 ml</span>
@@ -215,7 +215,11 @@ export default function Nutricao() {
                 <button
                   type="button"
                   onClick={() => handleAddWater(500)}
-                  className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-[#F43F8E] to-[#D63370] text-white flex flex-col items-center justify-center gap-1 shadow-md shadow-[#F43F8E]/25 btn-tap-scale transition-all"
+                  style={{
+                    background: `linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%)`,
+                    boxShadow: `0 6px 18px var(--primary-glow)`,
+                  }}
+                  className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl text-white flex flex-col items-center justify-center gap-1 btn-tap-scale transition-all"
                 >
                   <Droplets className="w-5 h-5" />
                   <span className="text-xs font-bold">+500 ml</span>
@@ -261,7 +265,7 @@ export default function Nutricao() {
           <button
             type="button"
             onClick={handleSaveAllMeals}
-            className="self-start sm:self-center px-6 py-2.5 bg-[#F43F8E] hover:bg-[#D63370] text-white text-xs font-bold rounded-2xl shadow-md transition-all flex items-center gap-2 btn-tap-scale"
+            className="self-start sm:self-center px-6 py-2.5 bg-(--primary-color) hover:bg-(--primary-hover) text-white text-xs font-bold rounded-2xl shadow-md transition-all flex items-center gap-2 btn-tap-scale"
           >
             <Save className="w-3.5 h-3.5" />
             <span>Salvar Diário Alimentar</span>
@@ -294,7 +298,7 @@ export default function Nutricao() {
               >
                 {/* Título do Card */}
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-(--primary-subtle) text-(--primary-color) flex items-center justify-center">
                     <Icon className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-sm text-[#1F1A1D]">{cfg.title}</h3>
@@ -384,7 +388,7 @@ export default function Nutricao() {
                             'py-2 rounded-xl text-xs font-bold transition-all border',
                             isSelected
                               ? `${colors[lvl - 1]} text-white border-transparent shadow-sm scale-105`
-                              : 'bg-[#F7F4F6] text-gray-700 border-gray-200 hover:bg-[#FCE4EC]',
+                              : 'bg-[#F7F4F6] text-gray-700 border-gray-200 hover:bg-(--primary-subtle)',
                           )}
                         >
                           {lvl}
@@ -405,7 +409,7 @@ export default function Nutricao() {
                     value={meal.notes || ''}
                     onChange={(e) => handleUpdateMeal(cfg.type, { notes: e.target.value })}
                     placeholder="O que comeu? Ex: Salada verde, peito de frango grelhado..."
-                    className="w-full p-2.5 rounded-xl border border-gray-200 bg-[#F7F4F6] text-xs text-gray-800 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E] resize-none"
+                    className="w-full p-2.5 rounded-xl border border-gray-200 bg-[#F7F4F6] text-xs text-gray-800 placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--primary-color) resize-none"
                   />
                 </div>
               </div>
@@ -444,7 +448,7 @@ export default function Nutricao() {
       {/* MODAL CONFIGURAR META DE ÁGUA */}
       {showGoalModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-[#FCE4EC] space-y-4 animate-scale-in">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-(--primary-subtle-border) space-y-4 animate-scale-in">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-[#1F1A1D]">Definir Meta de Água</h3>
               <button
@@ -468,7 +472,7 @@ export default function Nutricao() {
                     value={goalInput}
                     onChange={(e) => setGoalInput(e.target.value)}
                     placeholder="2,0"
-                    className="w-full px-3 py-2 text-center text-xl font-bold bg-[#F7F4F6] rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                    className="w-full px-3 py-2 text-center text-xl font-bold bg-[#F7F4F6] rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-(--primary-color)"
                   />
                   <span className="font-bold text-gray-500">L</span>
                 </div>
@@ -481,7 +485,7 @@ export default function Nutricao() {
                     key={v}
                     type="button"
                     onClick={() => setGoalInput(String(v).replace('.', ','))}
-                    className="px-2.5 py-1 text-xs rounded-lg bg-[#FCE4EC] text-[#F43F8E] font-semibold hover:bg-[#F9A8C9]/60"
+                    className="px-2.5 py-1 text-xs rounded-lg bg-(--primary-subtle) text-(--primary-color) font-semibold hover:bg-(--primary-light)/40"
                   >
                     {v}L
                   </button>
@@ -490,7 +494,7 @@ export default function Nutricao() {
 
               <button
                 type="submit"
-                className="w-full py-2.5 bg-[#F43F8E] hover:bg-[#D63370] text-white font-bold text-xs rounded-xl shadow-md transition-colors"
+                className="w-full py-2.5 bg-(--primary-color) hover:bg-(--primary-hover) text-white font-bold text-xs rounded-xl shadow-md transition-colors"
               >
                 Salvar Meta
               </button>

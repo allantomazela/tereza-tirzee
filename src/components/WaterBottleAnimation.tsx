@@ -45,9 +45,9 @@ export default function WaterBottleAnimation({ currentMl, goalMl }: WaterBottleA
         <defs>
           {/* Gradiente do líquido de hidratação */}
           <linearGradient id="waterPinkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#F9A8C9" stopOpacity="0.85" />
-            <stop offset="40%" stopColor="#F43F8E" stopOpacity="0.75" />
-            <stop offset="100%" stopColor="#D63370" stopOpacity="0.92" />
+            <stop offset="0%" stopColor="var(--primary-liquid-middle)" stopOpacity="0.85" />
+            <stop offset="40%" stopColor="var(--primary-liquid-start)" stopOpacity="0.75" />
+            <stop offset="100%" stopColor="var(--primary-liquid-end)" stopOpacity="0.92" />
           </linearGradient>
 
           {/* Gradiente verde para meta batida */}
@@ -194,8 +194,8 @@ export default function WaterBottleAnimation({ currentMl, goalMl }: WaterBottleA
             y="10"
             width="48"
             height="18"
-            fill="#F43F8E"
-            stroke="#D63370"
+            fill="var(--primary-color)"
+            stroke="var(--primary-hover)"
             strokeWidth="2"
             rx="5"
           />

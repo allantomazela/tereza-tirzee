@@ -236,12 +236,14 @@ export default function Perfil() {
       </div>
 
       {/* AVISO CLÍNICO OBRIGATÓRIO */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-[#FCE4EC] border border-[#F9A8C9]/60 flex items-start gap-3.5 shadow-xs">
-        <div className="w-8 h-8 rounded-xl bg-white text-[#F43F8E] flex items-center justify-center shrink-0 shadow-xs">
+      <div className="p-4 sm:p-5 rounded-3xl bg-(--primary-subtle) border border-(--primary-subtle-border) flex items-start gap-3.5 shadow-xs">
+        <div className="w-8 h-8 rounded-xl bg-white text-(--primary-color) flex items-center justify-center shrink-0 shadow-xs">
           <Info className="w-5 h-5" />
         </div>
         <div className="text-xs sm:text-sm text-[#1F1A1D]/90 leading-relaxed">
-          <strong className="block text-[#F43F8E] font-bold">Nota de Segurança Clínica:</strong>
+          <strong className="block text-(--primary-color) font-bold">
+            Nota de Segurança Clínica:
+          </strong>
           As informações do aplicativo TEREZA sobre a Tirzepatida (como dosagem titulada, locais de
           injeção e intervalos) são meramente orientativas e educativas. Siga sempre as orientações
           e a prescrição do seu médico endocrinologista.
@@ -251,7 +253,7 @@ export default function Perfil() {
       {/* SEÇÃO 1: DADOS PESSOAIS */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E7EB] shadow-card-soft space-y-6">
         <div className="flex items-center gap-2.5 pb-2 border-b border-gray-100">
-          <div className="w-8 h-8 rounded-xl bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-(--primary-subtle) text-(--primary-color) flex items-center justify-center">
             <UserCircle className="w-4 h-4" />
           </div>
           <h2 className="font-bold text-base text-[#1F1A1D]">Dados Pessoais & Metas</h2>
@@ -270,7 +272,7 @@ export default function Perfil() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Seu nome"
-                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--primary-color)"
               />
             </div>
 
@@ -285,7 +287,7 @@ export default function Perfil() {
                 value={heightCm}
                 onChange={(e) => setHeightCm(e.target.value)}
                 placeholder="165"
-                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--primary-color)"
               />
             </div>
 
@@ -300,7 +302,7 @@ export default function Perfil() {
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
                 placeholder="35"
-                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--primary-color)"
               />
             </div>
 
@@ -315,7 +317,7 @@ export default function Perfil() {
                 value={initialWeight}
                 onChange={(e) => setInitialWeight(e.target.value)}
                 placeholder="84,5"
-                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--primary-color)"
               />
             </div>
 
@@ -330,7 +332,7 @@ export default function Perfil() {
                 value={targetWeight}
                 onChange={(e) => setTargetWeight(e.target.value)}
                 placeholder="68,0"
-                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                className="w-full px-4 py-2.5 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--primary-color)"
               />
             </div>
           </div>
@@ -395,7 +397,7 @@ export default function Perfil() {
                   className={cn(
                     'px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition',
                     waterUnit === 'L'
-                      ? 'bg-[#FCE4EC] border-[#F43F8E] text-[#F43F8E]'
+                      ? 'bg-(--primary-subtle) border-(--primary-color) text-(--primary-color)'
                       : 'bg-white border-gray-200 text-gray-600',
                   )}
                 >
@@ -407,7 +409,7 @@ export default function Perfil() {
                   className={cn(
                     'px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition',
                     waterUnit === 'ml'
-                      ? 'bg-[#FCE4EC] border-[#F43F8E] text-[#F43F8E]'
+                      ? 'bg-(--primary-subtle) border-(--primary-color) text-(--primary-color)'
                       : 'bg-white border-gray-200 text-gray-600',
                   )}
                 >
@@ -425,7 +427,7 @@ export default function Perfil() {
                   className={cn(
                     'px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition',
                     weightUnit === 'kg'
-                      ? 'bg-[#FCE4EC] border-[#F43F8E] text-[#F43F8E]'
+                      ? 'bg-(--primary-subtle) border-(--primary-color) text-(--primary-color)'
                       : 'bg-white border-gray-200 text-gray-600',
                   )}
                 >
@@ -437,7 +439,7 @@ export default function Perfil() {
                   className={cn(
                     'px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition',
                     weightUnit === 'lb'
-                      ? 'bg-[#FCE4EC] border-[#F43F8E] text-[#F43F8E]'
+                      ? 'bg-(--primary-subtle) border-(--primary-color) text-(--primary-color)'
                       : 'bg-white border-gray-200 text-gray-600',
                   )}
                 >
@@ -450,7 +452,7 @@ export default function Perfil() {
           <div className="pt-2">
             <button
               type="submit"
-              className="px-6 py-3 bg-[#F43F8E] hover:bg-[#D63370] text-white font-bold text-xs rounded-2xl shadow-md btn-tap-scale transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-(--primary-color) hover:bg-(--primary-hover) text-white font-bold text-xs rounded-2xl shadow-md btn-tap-scale transition-all flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
               <span>Salvar Perfil</span>
@@ -463,7 +465,7 @@ export default function Perfil() {
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E7EB] shadow-card-soft space-y-6">
         <div className="flex items-center justify-between pb-2 border-b border-gray-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-(--primary-subtle) text-(--primary-color) flex items-center justify-center">
               <Syringe className="w-4 h-4" />
             </div>
             <div>
@@ -491,7 +493,7 @@ export default function Perfil() {
                 className={cn(
                   'p-3 rounded-2xl border text-center transition-all chip-scale',
                   currentPenMg === mg
-                    ? 'bg-[#FCE4EC] border-[#F43F8E] text-[#F43F8E] font-bold shadow-2xs'
+                    ? 'bg-(--primary-subtle) border-(--primary-color) text-(--primary-color) font-bold shadow-2xs'
                     : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50',
                 )}
               >
@@ -511,7 +513,7 @@ export default function Perfil() {
               </span>
               <span className="text-[11px] text-gray-500">
                 Caneta de <strong>{currentPenMg} mg</strong> em 0,5 ml ={' '}
-                <strong className="text-[#F43F8E]">
+                <strong className="text-(--primary-color)">
                   {(currentPenMg / 0.5).toFixed(1).replace('.0', '')} mg/ml
                 </strong>{' '}
                 (Ex.: 5 mg = {((5 / (currentPenMg / 0.5)) * 100).toFixed(1).replace('.', ',')} UI)
@@ -519,7 +521,7 @@ export default function Perfil() {
             </div>
 
             <div className="flex items-center gap-2 self-start sm:self-center">
-              <span className="text-xs font-bold text-[#F43F8E] px-3 py-1 bg-white rounded-xl border border-[#F9A8C9]">
+              <span className="text-xs font-bold text-(--primary-color) px-3 py-1 bg-white rounded-xl border border-(--primary-subtle-border)">
                 {useCustomConc
                   ? customConcValue
                   : (currentPenMg / 0.5).toFixed(1).replace('.0', '')}{' '}
@@ -539,7 +541,7 @@ export default function Perfil() {
                     setCustomConcValue(String(currentPenMg / 0.5).replace('.', ','))
                   }
                 }}
-                className="rounded text-[#F43F8E] focus:ring-[#F43F8E]"
+                className="rounded text-(--primary-color) focus:ring-(--primary-color)"
               />
               <span>Usar concentração manipulada personalizada (mg/ml)</span>
             </label>
@@ -552,7 +554,7 @@ export default function Perfil() {
                   value={customConcValue}
                   onChange={(e) => setCustomConcValue(e.target.value)}
                   placeholder="Ex: 30"
-                  className="w-20 px-2.5 py-1 text-center text-xs font-bold bg-white rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                  className="w-20 px-2.5 py-1 text-center text-xs font-bold bg-white rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-(--primary-color)"
                 />
                 <span className="text-xs font-bold text-gray-500">mg/ml</span>
               </div>
@@ -569,7 +571,7 @@ export default function Perfil() {
             <button
               type="button"
               onClick={() => setShowAddStep(!showAddStep)}
-              className="text-xs font-bold text-[#F43F8E] hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-(--primary-color) hover:underline flex items-center gap-1"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Adicionar etapa</span>
@@ -577,8 +579,8 @@ export default function Perfil() {
           </div>
 
           {showAddStep && (
-            <div className="p-4 rounded-2xl bg-[#FFF5F8] border border-[#F9A8C9]/40 space-y-3 animate-fade-in">
-              <span className="text-xs font-bold text-[#F43F8E] block">
+            <div className="p-4 rounded-2xl bg-white border border-(--primary-subtle-border) space-y-3 animate-fade-in">
+              <span className="text-xs font-bold text-(--primary-color) block">
                 Registrar Progressão de Dose
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -632,7 +634,7 @@ export default function Perfil() {
                 <button
                   type="button"
                   onClick={handleAddTitrationStep}
-                  className="px-4 py-1.5 bg-[#F43F8E] hover:bg-[#D63370] text-white text-xs font-bold rounded-xl shadow-2xs"
+                  className="px-4 py-1.5 bg-(--primary-color) hover:bg-(--primary-hover) text-white text-xs font-bold rounded-xl shadow-2xs"
                 >
                   Salvar Etapa
                 </button>
@@ -648,7 +650,7 @@ export default function Perfil() {
                 className="flex items-center justify-between p-3 rounded-2xl bg-[#F7F4F6] border border-gray-100 text-xs"
               >
                 <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-[#FCE4EC] text-[#F43F8E] font-bold flex items-center justify-center text-[11px]">
+                  <span className="w-6 h-6 rounded-full bg-(--primary-subtle) text-(--primary-color) font-bold flex items-center justify-center text-[11px]">
                     {idx + 1}
                   </span>
                   <div>
@@ -676,7 +678,7 @@ export default function Perfil() {
           <button
             type="button"
             onClick={handleSaveProfile}
-            className="px-6 py-2.5 bg-[#F43F8E] hover:bg-[#D63370] text-white font-bold text-xs rounded-2xl shadow-md btn-tap-scale transition-all flex items-center gap-2"
+            className="px-6 py-2.5 bg-(--primary-color) hover:bg-(--primary-hover) text-white font-bold text-xs rounded-2xl shadow-md btn-tap-scale transition-all flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
             <span>Salvar Configurações de Dose</span>
@@ -703,7 +705,7 @@ export default function Perfil() {
           <div className="p-4 sm:p-5 rounded-2xl bg-[#F7F4F6] border border-[#E5E7EB] space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[#F43F8E]" />
+                <Calendar className="w-4 h-4 text-(--primary-color)" />
                 <span className="font-bold text-sm text-[#1F1A1D]">
                   Lembrete de Medicação (Tirzepatida)
                 </span>
@@ -715,7 +717,7 @@ export default function Perfil() {
                   onChange={(e) => setMedicationEnabled(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#F43F8E]" />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-(--primary-color)" />
               </label>
             </div>
 
@@ -727,7 +729,7 @@ export default function Perfil() {
                       htmlFor={medTimeId}
                       className="flex items-center gap-1.5 text-xs font-semibold text-gray-700"
                     >
-                      <Clock className="w-3.5 h-3.5 text-[#F43F8E]" />
+                      <Clock className="w-3.5 h-3.5 text-(--primary-color)" />
                       <span>Horário habitual da injeção:</span>
                     </label>
                     <input
@@ -772,7 +774,7 @@ export default function Perfil() {
                           className={cn(
                             'px-3 py-1.5 rounded-xl text-xs font-semibold border transition',
                             isSelected
-                              ? 'bg-[#FCE4EC] border-[#F43F8E] text-[#F43F8E]'
+                              ? 'bg-(--primary-subtle) border-(--primary-color) text-(--primary-color)'
                               : 'bg-white border-gray-200 text-gray-600',
                           )}
                         >
@@ -850,7 +852,7 @@ export default function Perfil() {
 
           <button
             type="submit"
-            className="px-6 py-2.5 bg-[#F43F8E] hover:bg-[#D63370] text-white font-bold text-xs rounded-2xl shadow-md btn-tap-scale transition-all flex items-center gap-2"
+            className="px-6 py-2.5 bg-(--primary-color) hover:bg-(--primary-hover) text-white font-bold text-xs rounded-2xl shadow-md btn-tap-scale transition-all flex items-center gap-2"
           >
             <Save className="w-4 h-4" />
             <span>Salvar Preferências de Lembrete</span>
@@ -916,10 +918,10 @@ export default function Perfil() {
       </div>
 
       {/* SEÇÃO 3.5: EXPORTAR RELATÓRIO CLÍNICO */}
-      <div className="bg-gradient-to-r from-white to-[#FCE4EC]/50 rounded-3xl p-6 sm:p-8 border border-[#F9A8C9]/40 shadow-card-soft space-y-3">
+      <div className="bg-gradient-to-r from-white to-(--primary-subtle)/50 rounded-3xl p-6 sm:p-8 border border-(--primary-subtle-border) shadow-card-soft space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-(--primary-subtle) text-(--primary-color) flex items-center justify-center">
               <FileText className="w-5 h-5" />
             </div>
             <div>
@@ -936,7 +938,7 @@ export default function Perfil() {
           <button
             type="button"
             onClick={() => setShowMedicalReportModal(true)}
-            className="px-5 py-2.5 bg-[#F43F8E] hover:bg-[#D63370] text-white font-bold text-xs rounded-2xl shadow-md btn-tap-scale transition-all flex items-center gap-2"
+            className="px-5 py-2.5 bg-(--primary-color) hover:bg-(--primary-hover) text-white font-bold text-xs rounded-2xl shadow-md btn-tap-scale transition-all flex items-center gap-2"
           >
             <FileText className="w-4 h-4" />
             <span>Gerar Relatório Clínico</span>

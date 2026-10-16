@@ -121,14 +121,14 @@ export default function SyringeAnimation({
   return (
     <div className="w-full flex flex-col items-center select-none space-y-4">
       {/* CARD DA SERINGA */}
-      <div className="w-full relative overflow-hidden bg-gradient-to-b from-[#FFF5F8] via-white to-[#FCE4EC]/30 rounded-3xl p-3 sm:p-5 border border-[#F9A8C9]/40 shadow-inner">
+      <div className="w-full relative overflow-hidden bg-gradient-to-b from-white via-white to-(--primary-subtle)/30 rounded-3xl p-3 sm:p-5 border border-(--primary-subtle-border) shadow-inner">
         {/* Barra superior de status e controles do modelo */}
         <div className="flex items-center justify-between px-1 sm:px-3 pb-2 text-[11px]">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1.5">
               <span className="text-[#1F1A1D] font-bold">Seringa de Insulina 0,5 ml | 50 UI</span>
-              <span className="text-[#F43F8E] font-medium hidden sm:inline">
+              <span className="text-(--primary-color) font-medium hidden sm:inline">
                 • Guia Oficial de Fracionamento 15 mg
               </span>
             </div>
@@ -236,16 +236,16 @@ export default function SyringeAnimation({
               </linearGradient>
 
               <linearGradient id="liquidPinkHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#F43F8E" stopOpacity="0.9" />
-                <stop offset="20%" stopColor="#FDA4AF" stopOpacity="0.95" />
-                <stop offset="55%" stopColor="#F43F8E" stopOpacity="0.88" />
-                <stop offset="85%" stopColor="#E11D48" stopOpacity="0.92" />
-                <stop offset="100%" stopColor="#BE123C" stopOpacity="0.95" />
+                <stop offset="0%" stopColor="var(--primary-liquid-start)" stopOpacity="0.9" />
+                <stop offset="20%" stopColor="var(--primary-liquid-middle)" stopOpacity="0.95" />
+                <stop offset="55%" stopColor="var(--primary-liquid-start)" stopOpacity="0.88" />
+                <stop offset="85%" stopColor="var(--primary-hover)" stopOpacity="0.92" />
+                <stop offset="100%" stopColor="var(--primary-liquid-end)" stopOpacity="0.95" />
               </linearGradient>
 
               <linearGradient id="tagPinkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#F43F8E" />
-                <stop offset="100%" stopColor="#D63370" />
+                <stop offset="0%" stopColor="var(--primary-color)" />
+                <stop offset="100%" stopColor="var(--primary-hover)" />
               </linearGradient>
 
               <linearGradient id="orangePistonHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -320,7 +320,7 @@ export default function SyringeAnimation({
                   dx="0"
                   dy="0"
                   stdDeviation="4"
-                  floodColor="#F43F8E"
+                  floodColor="var(--primary-color)"
                   floodOpacity="0.8"
                 />
               </filter>
@@ -691,7 +691,7 @@ export default function SyringeAnimation({
                     cy={barrelCenterY}
                     rx="2.4"
                     ry="1.6"
-                    fill="#F43F8E"
+                    fill="var(--primary-color)"
                     opacity="0.95"
                   />
                   <circle cx="35.8" cy={barrelCenterY - 0.4} r="0.6" fill="#FFFFFF" opacity="0.9" />
@@ -1081,7 +1081,7 @@ export default function SyringeAnimation({
                 y1={barrelBottom - 2}
                 x2="0"
                 y2={barrelBottom + 16}
-                stroke={matchedOfficial ? matchedOfficial.color : '#F43F8E'}
+                stroke={matchedOfficial ? matchedOfficial.color : 'var(--primary-color)'}
                 strokeWidth={matchedOfficial ? '2.8' : '2.2'}
                 strokeDasharray={matchedOfficial ? 'none' : '3 2'}
               />
@@ -1099,7 +1099,7 @@ export default function SyringeAnimation({
                   height="36"
                   rx="18"
                   fill="#FFFFFF"
-                  stroke={matchedOfficial ? matchedOfficial.color : '#F43F8E'}
+                  stroke={matchedOfficial ? matchedOfficial.color : 'var(--primary-color)'}
                   strokeWidth={matchedOfficial ? 2.5 : 2}
                 />
                 {/* Fundo colorido na tag */}
@@ -1144,7 +1144,7 @@ export default function SyringeAnimation({
                 {/* Seta do balão apontando para a linha do menisco */}
                 <polygon
                   points="80,-5 85,0 90,-5"
-                  fill={matchedOfficial ? matchedOfficial.color : '#F43F8E'}
+                  fill={matchedOfficial ? matchedOfficial.color : 'var(--primary-color)'}
                 />
               </g>
 
@@ -1153,7 +1153,7 @@ export default function SyringeAnimation({
                 cx="0"
                 cy={barrelCenterY}
                 r="4"
-                fill={matchedOfficial ? matchedOfficial.color : '#F43F8E'}
+                fill={matchedOfficial ? matchedOfficial.color : 'var(--primary-color)'}
                 stroke="#FFFFFF"
                 strokeWidth="1.8"
                 className="animate-ping"
@@ -1162,7 +1162,7 @@ export default function SyringeAnimation({
                 cx="0"
                 cy={barrelCenterY}
                 r="3.5"
-                fill={matchedOfficial ? matchedOfficial.color : '#F43F8E'}
+                fill={matchedOfficial ? matchedOfficial.color : 'var(--primary-color)'}
                 stroke="#FFFFFF"
                 strokeWidth="1"
               />
@@ -1173,15 +1173,15 @@ export default function SyringeAnimation({
         {/* ============================================================== */}
         {/* LEGENDA E DESTAQUES DO MODELO DE AGULHA FIXA                   */}
         {/* ============================================================== */}
-        <div className="mt-2 pt-3 border-t border-[#F9A8C9]/30 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-          <div className="p-2 rounded-xl bg-white/70 border border-[#F9A8C9]/30 shadow-2xs">
+        <div className="mt-2 pt-3 border-t border-(--primary-subtle-border) grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+          <div className="p-2 rounded-xl bg-white/70 border border-(--primary-subtle-border) shadow-2xs">
             <span className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide">
               Capacidade
             </span>
             <span className="text-xs font-black text-[#1F1A1D]">0,5 ml / 50 UI</span>
           </div>
 
-          <div className="p-2 rounded-xl bg-white/70 border border-[#F9A8C9]/30 shadow-2xs">
+          <div className="p-2 rounded-xl bg-white/70 border border-(--primary-subtle-border) shadow-2xs">
             <span className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide">
               Agulha Fixa
             </span>
@@ -1190,19 +1190,19 @@ export default function SyringeAnimation({
             </span>
           </div>
 
-          <div className="p-2 rounded-xl bg-white/70 border border-[#F9A8C9]/30 shadow-2xs">
+          <div className="p-2 rounded-xl bg-white/70 border border-(--primary-subtle-border) shadow-2xs">
             <span className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide">
               Vedação
             </span>
             <span className="text-xs font-black text-[#EA580C]">Êmbolo Laranja</span>
           </div>
 
-          <div className="p-2 rounded-xl bg-white/70 border border-[#F9A8C9]/30 shadow-2xs">
+          <div className="p-2 rounded-xl bg-white/70 border border-(--primary-subtle-border) shadow-2xs">
             <span className="block text-[10px] font-bold text-gray-500 uppercase tracking-wide">
               Zero Vazamento
             </span>
-            <span className="text-xs font-black text-[#F43F8E] flex items-center justify-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" /> Menisco Rosa
+            <span className="text-xs font-black text-(--primary-color) flex items-center justify-center gap-1">
+              <Sparkles className="w-3.5 h-3.5" /> Menisco Líquido
             </span>
           </div>
         </div>
@@ -1215,7 +1215,7 @@ export default function SyringeAnimation({
       <div className="w-full bg-white rounded-2xl p-3.5 sm:p-4 border border-[#E5E7EB] shadow-2xs space-y-2.5">
         <div className="flex items-center justify-between flex-wrap gap-1.5 pb-2 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+            <div className="w-6 h-6 rounded-lg bg-(--primary-subtle) text-(--primary-color) flex items-center justify-center">
               <Info className="w-3.5 h-3.5" />
             </div>
             <div>
