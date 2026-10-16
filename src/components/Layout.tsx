@@ -53,19 +53,20 @@ export default function Layout() {
       {/* SIDEBAR DESKTOP & TABLET */}
       <aside className="hidden md:flex flex-col fixed top-0 left-0 bottom-0 z-30 bg-white border-r border-[#E5E7EB] w-20 lg:w-64 transition-all duration-300">
         {/* LOGO */}
-        <div className="h-20 flex items-center px-4 lg:px-6 border-b border-(--primary-subtle)">
+        <div className="h-20 flex items-center px-4 lg:px-6 border-b border-gray-100 bg-white">
           <NavLink
             to="/"
             className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-(--primary-color) rounded-lg"
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-(--primary-color) to-(--primary-hover) flex items-center justify-center text-white shadow-md shadow-(--primary-glow) group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-(--primary-color) to-(--primary-hover) flex items-center justify-center text-white shadow-md shadow-(--primary-glow) group-hover:scale-105 transition-transform shrink-0">
               <Syringe className="w-5 h-5 text-white" strokeWidth={2.2} />
             </div>
-            <div className="hidden lg:flex flex-col">
-              <span className="text-xl font-bold tracking-tight text-(--primary-color)">
-                TEREZA
-              </span>
-              <span className="text-[10px] font-medium text-[#6B7280] tracking-wider uppercase">
+            <div className="hidden lg:flex flex-col leading-tight">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xl font-black tracking-tight text-[#0F172A]">TEREZA</span>
+                <span className="w-2 h-2 rounded-full bg-(--primary-color) shadow-2xs" />
+              </div>
+              <span className="text-[10px] font-semibold text-[#64748B] tracking-wider uppercase">
                 Saúde & Bem-estar
               </span>
             </div>
@@ -132,8 +133,35 @@ export default function Layout() {
 
       {/* ÁREA PRINCIPAL */}
       <div className="flex-1 flex flex-col md:pl-20 lg:pl-64 min-w-0 pb-24 md:pb-8">
+        {/* HEADER MOBILE SUPERIOR (LOGO TEREZA VISÍVEL EM 0-768px) */}
+        <header className="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200/80 px-4 py-2.5 flex items-center justify-between shadow-2xs">
+          <NavLink
+            to="/"
+            className="flex items-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-(--primary-color) rounded-lg"
+          >
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-(--primary-color) to-(--primary-hover) flex items-center justify-center text-white shadow-sm shadow-(--primary-glow)">
+              <Syringe className="w-4 h-4 text-white" strokeWidth={2.2} />
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-lg font-black tracking-tight text-[#0F172A]">TEREZA</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-(--primary-color)" />
+              <span className="text-[10px] font-medium text-[#64748B] ml-1 uppercase tracking-wider">
+                Saúde
+              </span>
+            </div>
+          </NavLink>
+
+          <NavLink
+            to="/perfil"
+            className="p-1.5 rounded-xl hover:bg-gray-100 text-[#64748B] transition-colors"
+            aria-label="Meu Perfil"
+          >
+            <UserCircle className="w-5 h-5 text-[#475569]" />
+          </NavLink>
+        </header>
+
         {/* BANNERS DE NOTIFICAÇÃO INTERNA */}
-        <div className="sticky top-0 z-20 px-4 sm:px-6 pt-3 space-y-2 max-w-4xl mx-auto w-full">
+        <div className="sticky top-12 md:top-0 z-20 px-4 sm:px-6 pt-3 space-y-2 max-w-4xl mx-auto w-full">
           {/* Lembrete de Dose Hoje */}
           {nextDoseInfo.isToday && showDoseBanner && (
             <div

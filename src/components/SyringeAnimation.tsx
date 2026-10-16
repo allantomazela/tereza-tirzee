@@ -204,10 +204,19 @@ export default function SyringeAnimation({
             <defs>
               {/* ==================== GRADIENTES ==================== */}
               <linearGradient id="needleCannulaHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#94A3B8" />
-                <stop offset="35%" stopColor="#FFFFFF" />
-                <stop offset="65%" stopColor="#CBD5E1" />
-                <stop offset="100%" stopColor="#64748B" />
+                <stop offset="0%" stopColor="#475569" />
+                <stop offset="20%" stopColor="#94A3B8" />
+                <stop offset="45%" stopColor="#FFFFFF" />
+                <stop offset="70%" stopColor="#E2E8F0" />
+                <stop offset="90%" stopColor="#64748B" />
+                <stop offset="100%" stopColor="#334155" />
+              </linearGradient>
+
+              <linearGradient id="needleBevelGrad" x1="0%" y1="0%" x2="100%" y2="50%">
+                <stop offset="0%" stopColor="#FFFFFF" />
+                <stop offset="40%" stopColor="#F1F5F9" />
+                <stop offset="70%" stopColor="#94A3B8" />
+                <stop offset="100%" stopColor="#475569" />
               </linearGradient>
 
               <linearGradient id="reinforcedHubHorizGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -305,13 +314,20 @@ export default function SyringeAnimation({
                 />
               </filter>
 
-              <filter id="needleSteelGlowHoriz" x="-30%" y="-40%" width="160%" height="180%">
+              <filter id="needleSteelGlowHoriz" x="-40%" y="-60%" width="180%" height="220%">
+                <feDropShadow
+                  dx="0"
+                  dy="1.5"
+                  stdDeviation="2"
+                  floodColor="#0F172A"
+                  floodOpacity="0.35"
+                />
                 <feDropShadow
                   dx="0"
                   dy="0"
-                  stdDeviation="1.8"
+                  stdDeviation="2.5"
                   floodColor="#38BDF8"
-                  floodOpacity="0.45"
+                  floodOpacity="0.55"
                 />
               </filter>
 
@@ -642,59 +658,104 @@ export default function SyringeAnimation({
             </g>
 
             {/* ============================================================== */}
-            {/* 5. AGULHA FIXA ULTRAFINA (8 x 0,30 mm / 30G)                   */}
+            {/* 5. AGULHA FIXA ULTRAFINA COM CÂNULA DE AÇO INOX E BISEL DESTACADO */}
             {/* ============================================================== */}
-            <g>
+            <g filter="url(#needleSteelGlowHoriz)">
+              {/* Sombra de contraste e contorno escuro da cânula metálica */}
               <line
-                x1="40"
+                x1="38"
                 y1={barrelCenterY}
-                x2="145"
+                x2="147"
                 y2={barrelCenterY}
-                stroke="#BAE6FD"
-                strokeWidth="3.2"
-                opacity="0.45"
-                filter="url(#needleSteelGlowHoriz)"
+                stroke="#1E293B"
+                strokeWidth="5.6"
+                strokeLinecap="round"
+                opacity="0.5"
               />
+              {/* Corpo da cânula metálica cilíndrica com gradiente de aço polido */}
               <line
                 x1="40"
                 y1={barrelCenterY}
-                x2="145"
+                x2="146"
                 y2={barrelCenterY}
                 stroke="url(#needleCannulaHorizGrad)"
-                strokeWidth="1.9"
-                strokeLinecap="round"
+                strokeWidth="4.2"
+                strokeLinecap="butt"
               />
+              {/* Reflexo longitudinal de aço inoxidável espelhado */}
               <line
-                x1="44"
-                y1={barrelCenterY - 0.4}
-                x2="142"
-                y2={barrelCenterY - 0.4}
+                x1="42"
+                y1={barrelCenterY - 0.9}
+                x2="144"
+                y2={barrelCenterY - 0.9}
                 stroke="#FFFFFF"
-                strokeWidth="0.7"
+                strokeWidth="1.2"
+                strokeLinecap="round"
                 opacity="0.95"
               />
-              <polygon
-                points={`40,${barrelCenterY} 48,${barrelCenterY - 1.2} 48,${barrelCenterY + 1.2}`}
-                fill="url(#needleCannulaHorizGrad)"
-                stroke="#64748B"
-                strokeWidth="0.3"
+              {/* Sombra inferior do cilindro de aço */}
+              <line
+                x1="42"
+                y1={barrelCenterY + 1.1}
+                x2="144"
+                y2={barrelCenterY + 1.1}
+                stroke="#334155"
+                strokeWidth="0.9"
+                strokeLinecap="round"
+                opacity="0.8"
               />
+              {/* Bisel trifacetado cortante na ponta esquerda */}
               <polygon
-                points={`40,${barrelCenterY} 46,${barrelCenterY - 0.8} 46,${barrelCenterY}`}
+                points={`28,${barrelCenterY} 41,${barrelCenterY - 2.5} 41,${barrelCenterY + 2.5}`}
+                fill="url(#needleBevelGrad)"
+                stroke="#334155"
+                strokeWidth="0.8"
+                strokeLinejoin="round"
+              />
+              {/* Faceta superior do bisel com corte reflexivo ultra-nítido */}
+              <polygon
+                points={`28,${barrelCenterY} 38,${barrelCenterY - 2.1} 41,${barrelCenterY}`}
                 fill="#FFFFFF"
-                opacity="0.9"
+                opacity="0.95"
               />
+              {/* Faceta inferior chanfrada */}
+              <polygon
+                points={`28,${barrelCenterY} 41,${barrelCenterY} 39,${barrelCenterY + 2}`}
+                fill="#64748B"
+                opacity="0.85"
+              />
+              {/* Microgota cristalina evidente na ponta do bisel quando há dose carregada */}
               {safeUnits > 0 && !showCap && (
                 <g className="animate-pulse">
+                  {/* Halo da gota */}
                   <ellipse
-                    cx="36.5"
+                    cx="22"
                     cy={barrelCenterY}
-                    rx="2.4"
-                    ry="1.6"
+                    rx="5.2"
+                    ry="3.8"
+                    fill="var(--primary-glow)"
+                    opacity="0.85"
+                  />
+                  {/* Corpo da microgota com cor primária dinâmica da Tirzepatida */}
+                  <ellipse
+                    cx="23"
+                    cy={barrelCenterY}
+                    rx="4.2"
+                    ry="3.0"
                     fill="var(--primary-color)"
+                    stroke="#FFFFFF"
+                    strokeWidth="0.8"
+                    opacity="0.96"
+                  />
+                  {/* Brilho especular branco da gota */}
+                  <circle
+                    cx="21.5"
+                    cy={barrelCenterY - 0.9}
+                    r="1.1"
+                    fill="#FFFFFF"
                     opacity="0.95"
                   />
-                  <circle cx="35.8" cy={barrelCenterY - 0.4} r="0.6" fill="#FFFFFF" opacity="0.9" />
+                  <circle cx="24.2" cy={barrelCenterY + 0.6} r="0.6" fill="#FFFFFF" opacity="0.8" />
                 </g>
               )}
             </g>

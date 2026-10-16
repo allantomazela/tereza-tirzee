@@ -209,9 +209,10 @@ export default function MedicalReportModal({ isOpen, onClose }: MedicalReportMod
           <div className="flex items-start justify-between border-b-2 border-(--primary-color) pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-black text-(--primary-color) tracking-tight">
-                  TEREZA
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-2xl font-black text-[#0F172A] tracking-tight">TEREZA</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-(--primary-color)" />
+                </div>
                 <span className="text-xs px-2 py-0.5 rounded-md bg-(--primary-subtle) text-(--primary-color) font-bold">
                   Relatório Clínico de Acompanhamento
                 </span>
