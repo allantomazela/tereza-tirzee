@@ -131,7 +131,7 @@ export default function Doses() {
   }
 
   return (
-    <div className="space-y-7 max-w-3xl mx-auto pb-12">
+    <div className="space-y-7 max-w-5xl mx-auto pb-12">
       {/* TOAST DE SUCESSO (SLIDE-DOWN 3S) */}
       {showToast && (
         <div
@@ -155,132 +155,140 @@ export default function Doses() {
         </p>
       </div>
 
-      {/* CARD CENTRAL — SERINGA ANIMADA */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E7EB] shadow-card-soft space-y-7">
-        {/* CONTADOR GRANDE COM PULO DE ESCALA */}
-        <div className="text-center space-y-1">
-          <div className="inline-flex items-baseline gap-2">
-            <span
-              className={cn(
-                'text-5xl sm:text-6xl font-black tracking-tight text-[#F43F8E] transition-transform duration-150 inline-block',
-                numberPulsing && 'scale-115 text-[#D63370]',
-              )}
-            >
-              {formatNumberBr(units, units % 1 === 0 ? 0 : 1)}
-            </span>
-            <span className="text-lg sm:text-xl font-bold text-[#6B7280] uppercase tracking-wide">
-              unidades
-            </span>
-          </div>
-
-          <div className="flex items-center justify-center gap-2">
-            <span className="px-3.5 py-1.5 rounded-full bg-[#FCE4EC] text-[#F43F8E] text-xs sm:text-sm font-bold shadow-2xs">
-              ≈ {formatNumberBr(calculatedMg, calculatedMg % 1 === 0 ? 0 : 2)} mg de Tirzepatida
-            </span>
-            <span className="text-[11px] text-[#6B7280]">
-              (Concentração: {profile.mgPer100Units || 25} mg / ml)
-            </span>
-          </div>
-        </div>
-
-        {/* ILUSTRAÇÃO DA SERINGA (WOW FEATURE) */}
-        <SyringeAnimation units={units} maxUnits={60} mgEquivalent={calculatedMg} />
-
-        {/* CONTROLE DESLIZANTE (SLIDER 0 - 60) */}
-        <div className="space-y-4 max-w-xl mx-auto px-2">
-          <div className="flex items-center justify-between text-xs font-bold text-[#6B7280]">
-            <span>0 un</span>
-            <span className="text-[#F43F8E]">Dose selecionada: {formatNumberBr(units, 1)} un</span>
-            <span>60 un</span>
-          </div>
-
-          <div className="relative">
-            <input
-              type="range"
-              min="0"
-              max="60"
-              step="0.5"
-              value={units}
-              aria-label="Ajustar unidades da dose"
-              onChange={(e) => handleSliderChange(parseFloat(e.target.value))}
-              className="w-full h-3 bg-[#FCE4EC] rounded-lg appearance-none cursor-pointer accent-[#F43F8E] focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
-            />
-          </div>
-
-          {/* ATALHOS RÁPIDOS DE DOSES CLÍNICAS (MG + UNIDADES) */}
-          <div className="space-y-1.5 pt-1">
-            <span className="block text-[11px] font-bold text-center text-gray-500 uppercase tracking-wide">
-              Atalhos de dosagem da caneta:
-            </span>
-            <div className="flex items-center justify-center gap-2 flex-wrap">
-              {[2.5, 5.0, 7.5, 10.0, 12.5, 15.0].map((mgVal) => {
-                const unVal = calculateUnitsFromMg(mgVal)
-                const isSelected = Math.abs(units - unVal) < 0.1
-                return (
-                  <button
-                    key={mgVal}
-                    type="button"
-                    onClick={() => handleSliderChange(unVal)}
-                    className={cn(
-                      'px-3 py-1.5 rounded-xl text-xs font-semibold transition-all btn-tap-scale flex items-center gap-1.5 shadow-2xs',
-                      isSelected
-                        ? 'bg-[#F43F8E] text-white shadow-sm'
-                        : 'bg-[#F7F4F6] text-[#6B7280] hover:bg-[#FCE4EC] hover:text-[#F43F8E]',
-                    )}
-                  >
-                    <span className="font-bold">{mgVal} mg</span>
-                    <span className="text-[10px] opacity-80">({unVal} un)</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* BOTÃO PARA INSERIR MANUALMENTE */}
-          <div className="text-center pt-2">
-            <button
-              type="button"
-              onClick={() => setShowManual(!showManual)}
-              className="text-xs font-semibold text-[#F43F8E] hover:underline"
-            >
-              {showManual ? 'Ocultar digitação manual' : 'Inserir valor manualmente'}
-            </button>
-          </div>
-
-          {/* CAMPO NUMÉRICO SINCRONIZADO BIDIRECIONALMENTE */}
-          {showManual && (
-            <div className="p-4 rounded-2xl bg-[#F7F4F6] border border-[#E5E7EB] space-y-2 animate-fade-in max-w-xs mx-auto">
-              <label
-                htmlFor={manualInputId}
-                className="block text-xs font-semibold text-gray-700 text-center"
-              >
-                Digite as unidades (0 a 60):
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  id={manualInputId}
-                  type="text"
-                  inputMode="decimal"
-                  value={manualInput}
-                  onChange={(e) => handleManualChange(e.target.value)}
-                  placeholder="Ex: 20"
+      {/* CARD PRINCIPAL — CONTROLE E VISUALIZAÇÃO DA SERINGA */}
+      <div className="bg-white rounded-3xl p-5 sm:p-7 lg:p-8 border border-[#E5E7EB] shadow-card-soft space-y-6">
+        {/* BLOCO RESPONSIVO: DESKTOP (LADO A LADO), MOBILE (COMPACTO VERTICAL) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-center">
+          {/* PAINEL DE CONTROLE DA DOSE (SLIDER + VALOR + ATALHOS) */}
+          <div className="lg:col-span-5 flex flex-col justify-center space-y-4">
+            {/* CONTADOR GRANDE COM PULO DE ESCALA */}
+            <div className="text-center lg:text-left space-y-1">
+              <div className="inline-flex items-baseline gap-2">
+                <span
                   className={cn(
-                    'w-full px-3 py-2 text-center text-lg font-bold bg-white rounded-xl border focus:outline-none focus:ring-2',
-                    errorMsg
-                      ? 'border-red-500 text-red-600 focus:ring-red-400'
-                      : 'border-gray-300 text-[#1F1A1D] focus:ring-[#F43F8E]',
+                    'text-4xl sm:text-5xl font-black tracking-tight text-[#F43F8E] transition-transform duration-150 inline-block',
+                    numberPulsing && 'scale-110 text-[#D63370]',
                   )}
-                />
-                <span className="text-xs font-bold text-gray-500">un</span>
+                >
+                  {formatNumberBr(units, units % 1 === 0 ? 0 : 1)}
+                </span>
+                <span className="text-base sm:text-lg font-bold text-[#6B7280] uppercase tracking-wide">
+                  unidades
+                </span>
               </div>
-              {errorMsg && (
-                <div className="flex items-center justify-center gap-1 text-xs text-red-600 font-medium">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  <span>{errorMsg}</span>
+
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                <span className="px-3 py-1 rounded-full bg-[#FCE4EC] text-[#F43F8E] text-xs font-bold shadow-2xs">
+                  ≈ {formatNumberBr(calculatedMg, calculatedMg % 1 === 0 ? 0 : 2)} mg de Tirzepatida
+                </span>
+                <span className="text-[11px] text-[#6B7280]">
+                  ({profile.mgPer100Units || 25} mg/ml)
+                </span>
+              </div>
+            </div>
+
+            {/* CONTROLE DESLIZANTE (SLIDER 0 - 60) — ESPAÇO OTIMIZADO */}
+            <div className="space-y-2.5 pt-1">
+              <div className="flex items-center justify-between text-xs font-bold text-[#6B7280]">
+                <span>0 un</span>
+                <span className="text-[#F43F8E]">Dose: {formatNumberBr(units, 1)} un</span>
+                <span>60 un</span>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="range"
+                  min="0"
+                  max="60"
+                  step="0.5"
+                  value={units}
+                  aria-label="Ajustar unidades da dose"
+                  onChange={(e) => handleSliderChange(parseFloat(e.target.value))}
+                  className="w-full h-3 bg-[#FCE4EC] rounded-lg appearance-none cursor-pointer accent-[#F43F8E] focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                />
+              </div>
+
+              {/* ATALHOS RÁPIDOS DE DOSES CLÍNICAS (MG + UNIDADES) */}
+              <div className="space-y-1.5 pt-1">
+                <span className="block text-[11px] font-bold text-center lg:text-left text-gray-500 uppercase tracking-wide">
+                  Atalhos da caneta:
+                </span>
+                <div className="flex items-center justify-center lg:justify-start gap-1.5 flex-wrap">
+                  {[2.5, 5.0, 7.5, 10.0, 12.5, 15.0].map((mgVal) => {
+                    const unVal = calculateUnitsFromMg(mgVal)
+                    const isSelected = Math.abs(units - unVal) < 0.1
+                    return (
+                      <button
+                        key={mgVal}
+                        type="button"
+                        onClick={() => handleSliderChange(unVal)}
+                        className={cn(
+                          'px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all btn-tap-scale flex items-center gap-1 shadow-2xs cursor-pointer',
+                          isSelected
+                            ? 'bg-[#F43F8E] text-white shadow-sm'
+                            : 'bg-[#F7F4F6] text-[#6B7280] hover:bg-[#FCE4EC] hover:text-[#F43F8E]',
+                        )}
+                      >
+                        <span className="font-bold">{mgVal} mg</span>
+                        <span className="text-[10px] opacity-80">({unVal} un)</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* BOTÃO PARA INSERIR MANUALMENTE */}
+              <div className="text-center lg:text-left pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowManual(!showManual)}
+                  className="text-xs font-semibold text-[#F43F8E] hover:underline cursor-pointer"
+                >
+                  {showManual ? 'Ocultar digitação manual' : 'Inserir valor manualmente'}
+                </button>
+              </div>
+
+              {/* CAMPO NUMÉRICO SINCRONIZADO BIDIRECIONALMENTE */}
+              {showManual && (
+                <div className="p-3 rounded-2xl bg-[#F7F4F6] border border-[#E5E7EB] space-y-2 animate-fade-in max-w-xs mx-auto lg:mx-0">
+                  <label
+                    htmlFor={manualInputId}
+                    className="block text-xs font-semibold text-gray-700 text-center lg:text-left"
+                  >
+                    Digite as unidades (0 a 60):
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id={manualInputId}
+                      type="text"
+                      inputMode="decimal"
+                      value={manualInput}
+                      onChange={(e) => handleManualChange(e.target.value)}
+                      placeholder="Ex: 20"
+                      className={cn(
+                        'w-full px-3 py-1.5 text-center text-base font-bold bg-white rounded-xl border focus:outline-none focus:ring-2',
+                        errorMsg
+                          ? 'border-red-500 text-red-600 focus:ring-red-400'
+                          : 'border-gray-300 text-[#1F1A1D] focus:ring-[#F43F8E]',
+                      )}
+                    />
+                    <span className="text-xs font-bold text-gray-500">un</span>
+                  </div>
+                  {errorMsg && (
+                    <div className="flex items-center justify-center lg:justify-start gap-1 text-xs text-red-600 font-medium">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      <span>{errorMsg}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
+          </div>
+
+          {/* VISUALIZAÇÃO DA SERINGA NA HORIZONTAL (AO LADO NO DESKTOP, LOGO ABAIXO NO MOBILE) */}
+          <div className="lg:col-span-7 flex items-center justify-center">
+            <SyringeAnimation units={units} maxUnits={60} mgEquivalent={calculatedMg} />
+          </div>
         </div>
 
         {/* SELEÇÃO DO LOCAL DA APLICAÇÃO */}
