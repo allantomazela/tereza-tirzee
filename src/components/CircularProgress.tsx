@@ -14,7 +14,7 @@ export default function CircularProgress({
   percentage,
   size = 110,
   strokeWidth = 9,
-  color = '#F43F8E',
+  color,
   gradientId,
   trackColor = '#F3F4F6',
   centerContent,
@@ -23,6 +23,7 @@ export default function CircularProgress({
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const strokeDashoffset = circumference - (clamped / 100) * circumference
+  const effectiveColor = color || 'var(--primary-color)'
 
   return (
     <div
@@ -33,8 +34,8 @@ export default function CircularProgress({
         {gradientId && (
           <defs>
             <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#F9A8C9" />
-              <stop offset="100%" stopColor="#F43F8E" />
+              <stop offset="0%" stopColor="var(--primary-light)" />
+              <stop offset="100%" stopColor="var(--primary-color)" />
             </linearGradient>
           </defs>
         )}
@@ -52,7 +53,7 @@ export default function CircularProgress({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={gradientId ? `url(#${gradientId})` : color}
+          stroke={gradientId ? `url(#${gradientId})` : effectiveColor}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}

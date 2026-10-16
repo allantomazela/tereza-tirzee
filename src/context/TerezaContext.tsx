@@ -10,6 +10,8 @@ import {
   MealRecord,
   MealType,
   PinkTheme,
+  GenderType,
+  ColorFamily,
 } from '@/types'
 import {
   DEFAULT_PROFILE,
@@ -21,9 +23,209 @@ import {
 import { getISOWeek, getTodayDateString, calculateIMC } from '@/lib/formatters'
 import { convertUnitsToMgOfficial, convertMgToUnitsOfficial } from '@/lib/fractionation'
 
+export interface ThemePalette {
+  name: string
+  colorFamily: ColorFamily
+  primary: string // CTA vibrante (#F43F8E, #2563EB, #D97706 etc.)
+  hover: string
+  light: string
+  subtle: string // Fundo suave cards/chips (#FCE4EC, #EFF6FF, #FEF3C7)
+  subtleBorder: string
+  glow: string
+  liquidStart: string
+  liquidMiddle: string
+  liquidEnd: string
+  // HSL para shadcn
+  primaryHsl: string
+  secondaryHsl: string
+  accentHsl: string
+  ringHsl: string
+}
+
+export const GENDER_THEME_MAP: Record<GenderType, ColorFamily> = {
+  female: 'pink',
+  male: 'blue',
+  non_binary: 'yellow',
+  agender: 'yellow',
+  prefer_not_to_say: 'yellow',
+}
+
+export const THEME_PALETTES: Record<ColorFamily, Record<string, ThemePalette>> = {
+  pink: {
+    classic: {
+      name: 'Rosa Choque Clássico',
+      colorFamily: 'pink',
+      primary: '#F43F8E',
+      hover: '#D63370',
+      light: '#F9A8C9',
+      subtle: '#FCE4EC',
+      subtleBorder: 'rgba(249, 168, 201, 0.45)',
+      glow: 'rgba(244, 63, 142, 0.28)',
+      liquidStart: '#F43F8E',
+      liquidMiddle: '#FDA4AF',
+      liquidEnd: '#BE123C',
+      primaryHsl: '333 89% 60%',
+      secondaryHsl: '336 60% 96%',
+      accentHsl: '336 60% 95%',
+      ringHsl: '333 89% 60%',
+    },
+    peach: {
+      name: 'Pêssego Delicado',
+      colorFamily: 'pink',
+      primary: '#FF6B9A',
+      hover: '#E85282',
+      light: '#FFB6C1',
+      subtle: '#FFF0F3',
+      subtleBorder: 'rgba(255, 182, 193, 0.5)',
+      glow: 'rgba(255, 107, 154, 0.28)',
+      liquidStart: '#FF6B9A',
+      liquidMiddle: '#FFC0CB',
+      liquidEnd: '#E85282',
+      primaryHsl: '341 100% 71%',
+      secondaryHsl: '348 100% 97%',
+      accentHsl: '348 100% 96%',
+      ringHsl: '341 100% 71%',
+    },
+    lavender: {
+      name: 'Lavanda & Rosa',
+      colorFamily: 'pink',
+      primary: '#D36B9B',
+      hover: '#BA5284',
+      light: '#E8B4CC',
+      subtle: '#F7EDF3',
+      subtleBorder: 'rgba(232, 180, 204, 0.5)',
+      glow: 'rgba(211, 107, 155, 0.28)',
+      liquidStart: '#D36B9B',
+      liquidMiddle: '#F2D3E3',
+      liquidEnd: '#BA5284',
+      primaryHsl: '332 53% 62%',
+      secondaryHsl: '325 36% 95%',
+      accentHsl: '325 36% 94%',
+      ringHsl: '332 53% 62%',
+    },
+  },
+  blue: {
+    classic: {
+      name: 'Azul Real Vibrante',
+      colorFamily: 'blue',
+      primary: '#2563EB',
+      hover: '#1D4ED8',
+      light: '#93C5FD',
+      subtle: '#EFF6FF',
+      subtleBorder: 'rgba(147, 197, 253, 0.5)',
+      glow: 'rgba(37, 99, 235, 0.28)',
+      liquidStart: '#2563EB',
+      liquidMiddle: '#93C5FD',
+      liquidEnd: '#1E40AF',
+      primaryHsl: '221 83% 53%',
+      secondaryHsl: '214 100% 97%',
+      accentHsl: '214 100% 96%',
+      ringHsl: '221 83% 53%',
+    },
+    cyan: {
+      name: 'Azul Celeste & Ciano',
+      colorFamily: 'blue',
+      primary: '#0284C7',
+      hover: '#0369A1',
+      light: '#7DD3FC',
+      subtle: '#F0F9FF',
+      subtleBorder: 'rgba(125, 211, 252, 0.5)',
+      glow: 'rgba(2, 132, 199, 0.28)',
+      liquidStart: '#0284C7',
+      liquidMiddle: '#BAE6FD',
+      liquidEnd: '#075985',
+      primaryHsl: '199 89% 48%',
+      secondaryHsl: '204 100% 97%',
+      accentHsl: '204 100% 96%',
+      ringHsl: '199 89% 48%',
+    },
+    indigo: {
+      name: 'Índigo Profundo',
+      colorFamily: 'blue',
+      primary: '#4F46E5',
+      hover: '#4338CA',
+      light: '#A5B4FC',
+      subtle: '#EEF2FF',
+      subtleBorder: 'rgba(165, 180, 252, 0.5)',
+      glow: 'rgba(79, 70, 229, 0.28)',
+      liquidStart: '#4F46E5',
+      liquidMiddle: '#C7D2FE',
+      liquidEnd: '#3730A3',
+      primaryHsl: '243 75% 59%',
+      secondaryHsl: '226 100% 97%',
+      accentHsl: '226 100% 96%',
+      ringHsl: '243 75% 59%',
+    },
+  },
+  yellow: {
+    classic: {
+      name: 'Dourado Âmbar (Alto Contraste)',
+      colorFamily: 'yellow',
+      primary: '#D97706',
+      hover: '#B45309',
+      light: '#FCD34D',
+      subtle: '#FFFBEB',
+      subtleBorder: 'rgba(252, 211, 77, 0.55)',
+      glow: 'rgba(217, 119, 6, 0.28)',
+      liquidStart: '#D97706',
+      liquidMiddle: '#FDE68A',
+      liquidEnd: '#92400E',
+      primaryHsl: '38 92% 50%',
+      secondaryHsl: '48 100% 96%',
+      accentHsl: '48 100% 95%',
+      ringHsl: '38 92% 50%',
+    },
+    gold: {
+      name: 'Amarelo Mostarda Seguro',
+      colorFamily: 'yellow',
+      primary: '#CA8A04',
+      hover: '#A16207',
+      light: '#FDE047',
+      subtle: '#FEFCE8',
+      subtleBorder: 'rgba(253, 224, 71, 0.55)',
+      glow: 'rgba(202, 138, 4, 0.28)',
+      liquidStart: '#CA8A04',
+      liquidMiddle: '#FEF08A',
+      liquidEnd: '#854D0E',
+      primaryHsl: '42 93% 47%',
+      secondaryHsl: '55 100% 97%',
+      accentHsl: '55 100% 96%',
+      ringHsl: '42 93% 47%',
+    },
+    sun: {
+      name: 'Sol Alaranjado Quente',
+      colorFamily: 'yellow',
+      primary: '#EA580C',
+      hover: '#C2410C',
+      light: '#FDBA74',
+      subtle: '#FFF7ED',
+      subtleBorder: 'rgba(253, 186, 116, 0.55)',
+      glow: 'rgba(234, 88, 12, 0.28)',
+      liquidStart: '#EA580C',
+      liquidMiddle: '#FED7AA',
+      liquidEnd: '#9A3412',
+      primaryHsl: '21 90% 48%',
+      secondaryHsl: '34 100% 96%',
+      accentHsl: '34 100% 95%',
+      ringHsl: '21 90% 48%',
+    },
+  },
+}
+
+export function resolveCurrentPalette(profile: UserProfile): ThemePalette {
+  const gender = profile.gender || 'female'
+  const baseFamily: ColorFamily = profile.colorFamily || GENDER_THEME_MAP[gender] || 'pink'
+
+  const familyPalettes = THEME_PALETTES[baseFamily] || THEME_PALETTES.pink
+  const subTone = profile.pinkTheme || 'classic'
+  return familyPalettes[subTone] || familyPalettes.classic
+}
+
 interface TerezaContextType {
   profile: UserProfile
   updateProfile: (updates: Partial<UserProfile>) => void
+  currentPalette: ThemePalette
+  activeColorFamily: ColorFamily
   addTitrationStep: (step: Omit<import('@/types').TitrationStep, 'id'>) => void
   deleteTitrationStep: (id: string) => void
   concentrationMgMl: number // Concentração efetiva em mg/ml
@@ -237,14 +439,42 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
   }, [reminders])
 
-  // Aplicar variáveis de tom de rosa ao root
+  // Determinar paleta ativa
+  const currentPalette = useMemo<ThemePalette>(() => {
+    return resolveCurrentPalette(profile)
+  }, [profile])
+
+  const activeColorFamily = currentPalette.colorFamily
+
+  // Aplicar variáveis CSS no root (:root) para todo o app
   useEffect(() => {
     const root = document.documentElement
-    const theme = PINK_PALETTES[profile.pinkTheme || 'classic']
-    root.style.setProperty('--pink-primary', theme.primary)
-    root.style.setProperty('--pink-hover', theme.hover)
-    root.style.setProperty('--pink-light', theme.light)
-  }, [profile.pinkTheme])
+
+    // Variáveis dinâmicas da aplicação
+    root.style.setProperty('--primary-color', currentPalette.primary)
+    root.style.setProperty('--primary-hover', currentPalette.hover)
+    root.style.setProperty('--primary-light', currentPalette.light)
+    root.style.setProperty('--primary-subtle', currentPalette.subtle)
+    root.style.setProperty('--primary-subtle-border', currentPalette.subtleBorder)
+    root.style.setProperty('--primary-glow', currentPalette.glow)
+    root.style.setProperty('--primary-liquid-start', currentPalette.liquidStart)
+    root.style.setProperty('--primary-liquid-middle', currentPalette.liquidMiddle)
+    root.style.setProperty('--primary-liquid-end', currentPalette.liquidEnd)
+
+    // Retrocompatibilidade para variáveis legadas --pink-*
+    root.style.setProperty('--pink-primary', currentPalette.primary)
+    root.style.setProperty('--pink-hover', currentPalette.hover)
+    root.style.setProperty('--pink-light', currentPalette.light)
+    root.style.setProperty('--pink-subtle', currentPalette.subtle)
+
+    // Variáveis shadcn/ui
+    root.style.setProperty('--primary', currentPalette.primaryHsl)
+    root.style.setProperty('--secondary', currentPalette.secondaryHsl)
+    root.style.setProperty('--accent', currentPalette.accentHsl)
+    root.style.setProperty('--ring', currentPalette.ringHsl)
+    root.style.setProperty('--sidebar-primary', currentPalette.primaryHsl)
+    root.style.setProperty('--sidebar-ring', currentPalette.ringHsl)
+  }, [currentPalette])
 
   // Ações de Perfil
   const updateProfile = (updates: Partial<UserProfile>) => {
@@ -659,6 +889,8 @@ export const TerezaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const value: TerezaContextType = {
     profile,
     updateProfile,
+    currentPalette,
+    activeColorFamily,
     addTitrationStep,
     deleteTitrationStep,
     concentrationMgMl,

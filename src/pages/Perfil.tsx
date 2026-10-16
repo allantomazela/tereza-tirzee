@@ -17,15 +17,33 @@ import {
   FileText,
 } from 'lucide-react'
 import { useTereza } from '@/context/TerezaContext'
-import { PinkTheme } from '@/types'
+import { GenderType, ColorFamily } from '@/types'
 import { cn } from '@/lib/utils'
 import { getTodayDateString } from '@/lib/formatters'
 import MedicalReportModal from '@/components/MedicalReportModal'
+import { GENDER_THEME_MAP, THEME_PALETTES } from '@/context/TerezaContext'
 
-const THEME_OPTIONS: { id: PinkTheme; name: string; primary: string; desc: string }[] = [
-  { id: 'classic', name: 'Rosa Choque Clássico', primary: '#F43F8E', desc: 'Vibrante e motivador' },
-  { id: 'peach', name: 'Rosa Pêssego', primary: '#FF6B9A', desc: 'Suave e caloroso' },
-  { id: 'lavender', name: 'Rosa Lavanda', primary: '#D36B9B', desc: 'Clínico e sereno' },
+const GENDER_OPTIONS: {
+  id: GenderType
+  label: string
+  previewColor: string
+  themeFamily: ColorFamily
+}[] = [
+  { id: 'female', label: 'Feminino', previewColor: '#F43F8E', themeFamily: 'pink' },
+  { id: 'male', label: 'Masculino', previewColor: '#2563EB', themeFamily: 'blue' },
+  {
+    id: 'non_binary',
+    label: 'Não binário / Gênero fluido',
+    previewColor: '#D97706',
+    themeFamily: 'yellow',
+  },
+  { id: 'agender', label: 'Agênero', previewColor: '#D97706', themeFamily: 'yellow' },
+  {
+    id: 'prefer_not_to_say',
+    label: 'Prefiro não declarar',
+    previewColor: '#D97706',
+    themeFamily: 'yellow',
+  },
 ]
 
 const DAYS_OF_WEEK = [
@@ -42,6 +60,8 @@ export default function Perfil() {
   const {
     profile,
     updateProfile,
+    currentPalette,
+    activeColorFamily,
     addTitrationStep,
     deleteTitrationStep,
     reminders,
@@ -53,7 +73,7 @@ export default function Perfil() {
   const [name, setName] = useState(profile.name)
   const [heightCm, setHeightCm] = useState(String(profile.heightCm))
   const [age, setAge] = useState(String(profile.age))
-  const [gender, setGender] = useState<'female' | 'male' | 'other'>(profile.gender)
+  const [gender, setGender] = useState<GenderType>(profile.gender || 'female')
   const [initialWeight, setInitialWeight] = useState(
     String(profile.initialWeight).replace('.', ','),
   )
@@ -87,8 +107,8 @@ export default function Perfil() {
   const [waterUnit, setWaterUnit] = useState<'ml' | 'L'>(profile.waterUnit || 'L')
   const [weightUnit, setWeightUnit] = useState<'kg' | 'lb'>(profile.weightUnit || 'kg')
 
-  // Tom de Rosa
-  const [selectedTheme, setSelectedTheme] = useState<PinkTheme>(profile.pinkTheme || 'classic')
+  // Subtom / Variação de cor
+  const [selectedTheme, setSelectedTheme] = useState<string>(profile.pinkTheme || 'classic')
 
   // Modais de Reset e Toasts
   const [resetModalStep, setResetModalStep] = useState<0 | 1 | 2>(0)
@@ -127,14 +147,17 @@ export default function Perfil() {
         ? parsedCustomConc
         : currentPenMg / 0.5
 
+    const targetFamily = GENDER_THEME_MAP[gender] || 'pink'
+
     updateProfile({
       name: name.trim(),
       heightCm: isNaN(parsedHeight) ? 165 : parsedHeight,
       age: isNaN(parsedAge) ? 35 : parsedAge,
       gender,
+      colorFamily: targetFamily,
       initialWeight: isNaN(parsedInitW) ? 80 : parsedInitW,
       targetWeight: isNaN(parsedTargW) ? 65 : parsedTargW,
-      pinkTheme: selectedTheme,
+      pinkTheme: selectedTheme as import('@/types').PinkTheme,
       waterUnit,
       weightUnit,
       currentPenMg,
@@ -143,7 +166,7 @@ export default function Perfil() {
       mgPer100Units: effectiveConc,
     })
 
-    triggerToast('Perfil, metas e dosagens salvas com sucesso!')
+    triggerToast('Perfil e tema atualizados com sucesso!')
   }
 
   const handleAddTitrationStep = (e: React.FormEvent) => {
@@ -312,29 +335,52 @@ export default function Perfil() {
             </div>
           </div>
 
-          {/* Gênero Chips */}
-          <div className="space-y-1.5">
-            <span className="block text-xs font-bold text-gray-700">Gênero:</span>
-            <div className="flex gap-2">
-              {[
-                { id: 'female', label: 'Feminino' },
-                { id: 'male', label: 'Masculino' },
-                { id: 'other', label: 'Outro' },
-              ].map((g) => (
-                <button
-                  key={g.id}
-                  type="button"
-                  onClick={() => setGender(g.id as 'female' | 'male' | 'other')}
-                  className={cn(
-                    'px-4 py-2 rounded-xl text-xs font-semibold border transition-all chip-scale',
-                    gender === g.id
-                      ? 'bg-[#FCE4EC] border-[#F43F8E] text-[#F43F8E]'
-                      : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50',
-                  )}
-                >
-                  {g.label}
-                </button>
-              ))}
+          {/* Gênero Chips (com troca automática de tema dinâmico) */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="block text-xs font-bold text-gray-700">
+                Gênero (determina o tema de cores do app):
+              </span>
+              <span className="text-[11px] font-semibold text-gray-500">
+                {activeColorFamily === 'pink' && 'Tema: Rosa (Padrão)'}
+                {activeColorFamily === 'blue' && 'Tema: Azul'}
+                {activeColorFamily === 'yellow' && 'Tema: Amarelo / Dourado'}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {GENDER_OPTIONS.map((g) => {
+                const isSelected = gender === g.id
+                return (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => {
+                      setGender(g.id)
+                      const newFamily = GENDER_THEME_MAP[g.id]
+                      // Sincroniza imediatamente o tema para efeito visual instantâneo
+                      updateProfile({
+                        gender: g.id,
+                        colorFamily: newFamily,
+                      })
+                      triggerToast(
+                        `Gênero alterado: tema ${newFamily === 'pink' ? 'Rosa' : newFamily === 'blue' ? 'Azul' : 'Amarelo/Dourado'} aplicado!`,
+                      )
+                    }}
+                    className={cn(
+                      'px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all chip-scale flex items-center gap-2',
+                      isSelected
+                        ? 'border-(--primary-color) bg-(--primary-subtle) text-(--primary-color) shadow-xs'
+                        : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50',
+                    )}
+                  >
+                    <span
+                      className="w-2.5 h-2.5 rounded-full inline-block shrink-0 shadow-2xs"
+                      style={{ backgroundColor: g.previewColor }}
+                    />
+                    <span>{g.label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -812,50 +858,60 @@ export default function Perfil() {
         </form>
       </div>
 
-      {/* SEÇÃO 3: PERSONALIZAÇÃO — TOM DE ROSA PRINCIPAL */}
+      {/* SEÇÃO 3: PERSONALIZAÇÃO — TEMA DINÂMICO & SUBTONS */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5E7EB] shadow-card-soft space-y-4">
         <div className="flex items-center gap-2.5 pb-2 border-b border-gray-100">
-          <div className="w-8 h-8 rounded-xl bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-(--primary-subtle) text-(--primary-color) flex items-center justify-center">
             <Palette className="w-4 h-4" />
           </div>
           <div>
             <h2 className="font-bold text-base text-[#1F1A1D]">Paleta de Cores do App</h2>
             <p className="text-xs text-gray-500">
-              Escolha o tom de rosa predominante da sua interface.
+              A cor principal acompanha o seu gênero selecionado (
+              {gender === 'female' ? 'Rosa' : gender === 'male' ? 'Azul' : 'Amarelo/Dourado'}). Você
+              também pode refinar o subtom abaixo:
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          {THEME_OPTIONS.map((opt) => {
-            const isSelected = selectedTheme === opt.id
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => {
-                  setSelectedTheme(opt.id)
-                  updateProfile({ pinkTheme: opt.id })
-                  triggerToast(`Tema alterado para ${opt.name}!`)
-                }}
-                className={cn(
-                  'p-4 rounded-2xl border text-left transition-all chip-scale flex items-center gap-3',
-                  isSelected
-                    ? 'border-[#F43F8E] bg-[#FCE4EC]/40 shadow-xs'
-                    : 'border-gray-200 bg-white hover:bg-gray-50',
-                )}
-              >
-                <div
-                  className="w-8 h-8 rounded-full shadow-sm shrink-0 border-2 border-white"
-                  style={{ backgroundColor: opt.primary }}
-                />
-                <div>
-                  <span className="font-bold text-xs text-[#1F1A1D] block">{opt.name}</span>
-                  <span className="text-[10px] text-gray-500">{opt.desc}</span>
-                </div>
-              </button>
-            )
-          })}
+          {Object.entries(THEME_PALETTES[activeColorFamily] || THEME_PALETTES.pink).map(
+            ([key, opt]) => {
+              const isSelected = selectedTheme === key
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    setSelectedTheme(key)
+                    updateProfile({ pinkTheme: key as import('@/types').PinkTheme })
+                    triggerToast(`Subtom alterado para ${opt.name}!`)
+                  }}
+                  className={cn(
+                    'p-4 rounded-2xl border text-left transition-all chip-scale flex items-center gap-3',
+                    isSelected
+                      ? 'border-(--primary-color) bg-(--primary-subtle) shadow-xs'
+                      : 'border-gray-200 bg-white hover:bg-gray-50',
+                  )}
+                >
+                  <div
+                    className="w-8 h-8 rounded-full shadow-sm shrink-0 border-2 border-white"
+                    style={{ backgroundColor: opt.primary }}
+                  />
+                  <div>
+                    <span className="font-bold text-xs text-[#1F1A1D] block">{opt.name}</span>
+                    <span className="text-[10px] text-gray-500">
+                      {activeColorFamily === 'pink'
+                        ? 'Tom de rosa'
+                        : activeColorFamily === 'blue'
+                          ? 'Tom de azul'
+                          : 'Tom amarelo/dourado'}
+                    </span>
+                  </div>
+                </button>
+              )
+            },
+          )}
         </div>
       </div>
 

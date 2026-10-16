@@ -8,10 +8,22 @@
 
 @layer base {
   :root {
-    --pink-primary: #f43f8e;
-    --pink-hover: #d63370;
-    --pink-light: #f9a8c9;
-    --pink-subtle: #fce4ec;
+    /* Cores dinâmicas globais (padrão Feminino / Rosa-choque) */
+    --primary-color: #f43f8e;
+    --primary-hover: #d63370;
+    --primary-light: #f9a8c9;
+    --primary-subtle: #fce4ec;
+    --primary-subtle-border: rgba(249, 168, 201, 0.45);
+    --primary-glow: rgba(244, 63, 142, 0.28);
+    --primary-liquid-start: #f43f8e;
+    --primary-liquid-middle: #fda4af;
+    --primary-liquid-end: #be123c;
+
+    /* Compatibilidade reversa com variáveis pink legadas */
+    --pink-primary: var(--primary-color);
+    --pink-hover: var(--primary-hover);
+    --pink-light: var(--primary-light);
+    --pink-subtle: var(--primary-subtle);
     --pink-peach: #ffb6c1;
 
     --background: 330 15% 97%; /* #F7F4F6 */
@@ -65,6 +77,9 @@
       system-ui,
       -apple-system,
       sans-serif;
+    transition:
+      background-color 300ms ease,
+      color 300ms ease;
   }
 
   /* NEVER REMOVE THIS */
@@ -76,35 +91,35 @@
 
 @layer utilities {
   .bg-pink-core {
-    background-color: var(--pink-primary);
+    background-color: var(--primary-color);
   }
   .bg-pink-hover {
-    background-color: var(--pink-hover);
+    background-color: var(--primary-hover);
   }
   .text-pink-core {
-    color: var(--pink-primary);
+    color: var(--primary-color);
   }
   .border-pink-core {
-    border-color: var(--pink-primary);
+    border-color: var(--primary-color);
   }
   .ring-pink-core {
-    --tw-ring-color: var(--pink-primary);
+    --tw-ring-color: var(--primary-color);
   }
 
   .gradient-primary {
-    background: linear-gradient(135deg, var(--pink-primary) 0%, var(--pink-hover) 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
   }
 
   .gradient-next-dose {
-    background: linear-gradient(135deg, #f9a8c9 0%, var(--pink-primary) 100%);
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
   }
 
   .gradient-progress {
-    background: linear-gradient(135deg, #f9a8c9 0%, var(--pink-primary) 100%);
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
   }
 
   .shadow-pink-glow {
-    box-shadow: 0 4px 16px rgba(244, 63, 142, 0.28);
+    box-shadow: 0 4px 16px var(--primary-glow);
   }
 
   .shadow-card-soft {
@@ -114,7 +129,7 @@
   }
 
   .shadow-card-hover:hover {
-    box-shadow: 0 6px 18px rgba(244, 63, 142, 0.14);
+    box-shadow: 0 6px 18px var(--primary-glow);
     transform: translateY(-2px);
   }
 

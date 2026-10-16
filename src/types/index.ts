@@ -1,5 +1,9 @@
 export type PinkTheme = 'classic' | 'peach' | 'lavender'
 
+export type GenderType = 'female' | 'male' | 'non_binary' | 'agender' | 'prefer_not_to_say'
+
+export type ColorFamily = 'pink' | 'blue' | 'yellow'
+
 export type TirzepatidePen = '2.5' | '5' | '7.5' | '10' | '12.5' | '15' | 'custom'
 
 export interface TitrationStep {
@@ -13,10 +17,11 @@ export interface UserProfile {
   name: string
   heightCm: number
   age: number
-  gender: 'female' | 'male' | 'other'
+  gender: GenderType
   initialWeight: number
   targetWeight: number
-  pinkTheme: PinkTheme
+  pinkTheme?: PinkTheme
+  colorFamily?: ColorFamily
   waterUnit: 'ml' | 'L'
   weightUnit: 'kg' | 'lb'
   // Configurações clínicas de titulação e concentração

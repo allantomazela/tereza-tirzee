@@ -63,20 +63,25 @@ export default function Dashboard() {
           <button
             type="button"
             onClick={() => setShowMedicalReportModal(true)}
-            className="px-4 py-2 bg-white hover:bg-[#FCE4EC] text-[#F43F8E] font-bold text-xs rounded-2xl border border-[#F9A8C9] shadow-xs transition-all flex items-center gap-2 btn-tap-scale"
+            className="px-4 py-2 bg-white hover:bg-(--primary-subtle) text-(--primary-color) font-bold text-xs rounded-2xl border border-(--primary-light) shadow-xs transition-all flex items-center gap-2 btn-tap-scale"
           >
-            <FileText className="w-4 h-4 text-[#F43F8E]" />
+            <FileText className="w-4 h-4 text-(--primary-color)" />
             <span>Exportar Relatório Médico</span>
           </button>
           <div className="hidden lg:flex items-center gap-2 bg-white px-3.5 py-2 rounded-2xl border border-[#E5E7EB] text-xs text-[#6B7280] shadow-xs">
-            <Calendar className="w-3.5 h-3.5 text-[#F43F8E]" />
+            <Calendar className="w-3.5 h-3.5 text-(--primary-color)" />
             <span>{formatDateFriendly(new Date().toISOString().split('T')[0])}</span>
           </div>
         </div>
       </div>
 
-      {/* 2. CARD PRINCIPAL — PRÓXIMA DOSE (Gradiente Rosa) */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-[#F9A8C9] via-[#F43F8E] to-[#D63370] text-white shadow-xl shadow-[#F43F8E]/25">
+      {/* 2. CARD PRINCIPAL — PRÓXIMA DOSE (Gradiente com paleta dinâmica) */}
+      <div
+        className="relative overflow-hidden rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-black/10"
+        style={{
+          background: `linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 50%, var(--primary-hover) 100%)`,
+        }}
+      >
         {/* Efeitos decorativos de fundo */}
         <div className="absolute -right-8 -bottom-10 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
         <div className="absolute right-12 top-4 w-28 h-28 rounded-full bg-white/10 pointer-events-none" />
@@ -88,7 +93,7 @@ export default function Dashboard() {
               <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold tracking-wider uppercase">
                 Próxima Dose
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-white text-[#F43F8E] text-xs font-bold shadow-xs">
+              <span className="px-2.5 py-0.5 rounded-full bg-white text-(--primary-color) text-xs font-bold shadow-xs">
                 {nextDoseInfo.mgDose} mg • {nextDoseInfo.units} UI (
                 {formatNumberBr(nextDoseInfo.units / 100, 2)} ml)
               </span>
@@ -112,9 +117,9 @@ export default function Dashboard() {
           <div className="flex items-center gap-3 shrink-0">
             <Link
               to="/doses"
-              className="w-full sm:w-auto px-6 py-3.5 bg-white text-[#F43F8E] hover:bg-[#FCE4EC] active:scale-95 text-sm font-bold rounded-2xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-3.5 bg-white text-(--primary-color) hover:bg-(--primary-subtle) active:scale-95 text-sm font-bold rounded-2xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
             >
-              <Syringe className="w-4 h-4 text-[#F43F8E]" />
+              <Syringe className="w-4 h-4 text-(--primary-color)" />
               <span>Registrar Dose</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
@@ -150,7 +155,7 @@ export default function Dashboard() {
             </div>
             <Link
               to="/nutricao"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#F43F8E] hover:underline pt-1"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-(--primary-color) hover:underline pt-1"
             >
               <span>Adicionar +</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -175,7 +180,7 @@ export default function Dashboard() {
         <div className="bg-white rounded-3xl p-5 sm:p-6 border border-[#E5E7EB] shadow-card-soft hover:shadow-card-hover transition-all flex items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-[#6B7280]">
-              <div className="w-8 h-8 rounded-xl bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-(--primary-subtle) text-(--primary-color) flex items-center justify-center">
                 <Scale className="w-4 h-4" />
               </div>
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -198,7 +203,7 @@ export default function Dashboard() {
             </div>
             <Link
               to="/medidas"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#F43F8E] hover:underline pt-1"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-(--primary-color) hover:underline pt-1"
             >
               <span>Atualizar +</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -212,7 +217,7 @@ export default function Dashboard() {
             gradientId="weightProgressGrad"
             centerContent={
               <div className="text-center">
-                <Scale className="w-4 h-4 text-[#F43F8E] mx-auto" />
+                <Scale className="w-4 h-4 text-(--primary-color) mx-auto" />
                 <span className="text-xs font-bold text-[#1F1A1D]">{weightProgressPercent}%</span>
               </div>
             }
@@ -221,10 +226,10 @@ export default function Dashboard() {
       </div>
 
       {/* 4. CARD RELATÓRIO DA SEMANA (Agrupamento ISO) */}
-      <div className="bg-gradient-to-r from-white to-[#FCE4EC]/40 rounded-3xl p-5 sm:p-6 border border-[#F9A8C9]/40 shadow-card-soft">
+      <div className="bg-gradient-to-r from-white to-(--primary-subtle)/40 rounded-3xl p-5 sm:p-6 border border-(--primary-subtle-border) shadow-card-soft">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#F43F8E]/10 text-[#F43F8E] flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-(--primary-subtle) text-(--primary-color) flex items-center justify-center shrink-0">
               <Activity className="w-5 h-5" />
             </div>
             <div>
@@ -233,7 +238,7 @@ export default function Dashboard() {
                   Relatório da Semana
                 </h3>
                 {currentWeekSummary && (
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-[#FCE4EC] text-[#F43F8E] rounded-full">
+                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-(--primary-subtle) text-(--primary-color) rounded-full">
                     Semana {currentWeekSummary.weekNumber}
                   </span>
                 )}
@@ -249,7 +254,7 @@ export default function Dashboard() {
           <button
             type="button"
             onClick={() => setShowWeekModal(true)}
-            className="self-start sm:self-center px-4 py-2 bg-white hover:bg-[#FCE4EC] text-[#F43F8E] text-xs font-bold rounded-xl border border-[#F9A8C9] shadow-xs transition-colors flex items-center gap-1.5"
+            className="self-start sm:self-center px-4 py-2 bg-white hover:bg-(--primary-subtle) text-(--primary-color) text-xs font-bold rounded-xl border border-(--primary-light) shadow-xs transition-colors flex items-center gap-1.5"
           >
             <span>Ver detalhes</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -263,14 +268,14 @@ export default function Dashboard() {
         <div className="bg-white rounded-3xl p-6 border border-[#E5E7EB] shadow-card-soft space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-[#FCE4EC] text-[#F43F8E] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-(--primary-subtle) text-(--primary-color) flex items-center justify-center">
                 <Syringe className="w-4 h-4" />
               </div>
               <h3 className="font-bold text-base text-[#1F1A1D]">Últimas Doses</h3>
             </div>
             <Link
               to="/doses"
-              className="text-xs font-semibold text-[#F43F8E] hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-(--primary-color) hover:underline flex items-center gap-1"
             >
               <span>Ver todas</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -286,10 +291,10 @@ export default function Dashboard() {
               {recentDoses.map((dose) => (
                 <div
                   key={dose.id}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-[#F7F4F6] hover:bg-[#FCE4EC]/30 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-2xl bg-[#F7F4F6] hover:bg-(--primary-subtle)/30 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-white text-[#F43F8E] flex items-center justify-center shadow-xs">
+                    <div className="w-8 h-8 rounded-xl bg-white text-(--primary-color) flex items-center justify-center shadow-xs">
                       <HeartPulse className="w-4 h-4" />
                     </div>
                     <div>
@@ -326,7 +331,7 @@ export default function Dashboard() {
             </div>
             <Link
               to="/diario"
-              className="text-xs font-semibold text-[#F43F8E] hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-(--primary-color) hover:underline flex items-center gap-1"
             >
               <span>Abrir diário</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -343,11 +348,11 @@ export default function Dashboard() {
                 <div
                   key={entry.id}
                   onClick={() => navigate('/diario')}
-                  className="p-3 rounded-2xl bg-[#F7F4F6] hover:bg-[#FCE4EC]/30 transition-colors cursor-pointer space-y-1.5"
+                  className="p-3 rounded-2xl bg-[#F7F4F6] hover:bg-(--primary-subtle)/30 transition-colors cursor-pointer space-y-1.5"
                 >
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-[#1F1A1D]">{formatDateBr(entry.date)}</span>
-                    <span className="text-[10px] text-[#F43F8E] font-medium">
+                    <span className="text-[10px] text-(--primary-color) font-medium">
                       {entry.symptoms.length} sintoma(s)
                     </span>
                   </div>
@@ -364,8 +369,8 @@ export default function Dashboard() {
       {/* MODAL DETALHES DA SEMANA (ISO) */}
       {showWeekModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-[#FCE4EC] space-y-5 animate-scale-in">
-            <div className="flex items-center justify-between border-b border-[#FCE4EC] pb-3">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-(--primary-subtle) space-y-5 animate-scale-in">
+            <div className="flex items-center justify-between border-b border-(--primary-subtle) pb-3">
               <div>
                 <h3 className="text-lg font-bold text-[#1F1A1D]">
                   Relatório da Semana {currentWeekSummary?.weekNumber}
@@ -382,11 +387,10 @@ export default function Dashboard() {
                 ✕
               </button>
             </div>
-
             <div className="space-y-4 text-xs">
               {/* Doses */}
-              <div className="p-3.5 rounded-2xl bg-[#FCE4EC]/40 border border-[#F9A8C9]/30">
-                <div className="font-bold text-sm text-[#F43F8E] mb-2 flex items-center gap-1.5">
+              <div className="p-3.5 rounded-2xl bg-(--primary-subtle)/40 border border-(--primary-subtle-border)">
+                <div className="font-bold text-sm text-(--primary-color) mb-2 flex items-center gap-1.5">
                   <Syringe className="w-4 h-4" />
                   <span>Doses Aplicadas</span>
                 </div>
@@ -456,14 +460,13 @@ export default function Dashboard() {
                   )}
               </div>
             </div>
-
             <button
               type="button"
               onClick={() => setShowWeekModal(false)}
-              className="w-full py-3 bg-[#F43F8E] hover:bg-[#D63370] text-white font-bold rounded-2xl text-xs shadow-md transition-colors"
+              className="w-full py-3 bg-(--primary-color) hover:bg-(--primary-hover) text-white font-bold rounded-2xl text-xs shadow-md transition-colors"
             >
-              Fechar Resumo
-            </button>
+              Fechar Detalhes
+            </button>{' '}
           </div>
         </div>
       )}

@@ -15,6 +15,7 @@ export const DEFAULT_PROFILE: UserProfile = {
   initialWeight: 84.5,
   targetWeight: 68.0,
   pinkTheme: 'classic',
+  colorFamily: 'pink',
   waterUnit: 'L',
   weightUnit: 'kg',
   currentPenMg: 15.0, // Caneta 15 mg (30 mg/ml em 0,5 ml)

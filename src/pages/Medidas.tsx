@@ -117,7 +117,7 @@ export default function Medidas() {
                 htmlFor="input-weight"
                 className="flex items-center gap-1.5 text-xs font-bold text-gray-700"
               >
-                <Scale className="w-3.5 h-3.5 text-[#F43F8E]" />
+                <Scale className="w-3.5 h-3.5 text-(--primary-color)" />
                 <span>Peso Atual (kg) *</span>
               </label>
               <div className="relative">
@@ -131,7 +131,7 @@ export default function Medidas() {
                     setErrorMsg(null)
                   }}
                   placeholder="Ex: 78,5"
-                  className="w-full pl-3.5 pr-10 py-3 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-base font-bold text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                  className="w-full pl-3.5 pr-10 py-3 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-base font-bold text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--primary-color)"
                 />
                 <span className="absolute right-3.5 top-3.5 text-xs font-bold text-gray-400">
                   kg
@@ -145,7 +145,7 @@ export default function Medidas() {
                 htmlFor="input-fat"
                 className="flex items-center gap-1.5 text-xs font-bold text-gray-700"
               >
-                <Percent className="w-3.5 h-3.5 text-[#F43F8E]" />
+                <Percent className="w-3.5 h-3.5 text-(--primary-color)" />
                 <span>Massa Gorda (%)</span>
               </label>
               <div className="relative">
@@ -156,7 +156,7 @@ export default function Medidas() {
                   value={fatInput}
                   onChange={(e) => setFatInput(e.target.value)}
                   placeholder="Ex: 32,4"
-                  className="w-full pl-3.5 pr-10 py-3 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-base font-bold text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                  className="w-full pl-3.5 pr-10 py-3 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-base font-bold text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--primary-color)"
                 />
                 <span className="absolute right-3.5 top-3.5 text-xs font-bold text-gray-400">
                   %
@@ -181,7 +181,7 @@ export default function Medidas() {
                   value={waistInput}
                   onChange={(e) => setWaistInput(e.target.value)}
                   placeholder="Ex: 90"
-                  className="w-full pl-3.5 pr-10 py-3 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-base font-bold text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F43F8E]"
+                  className="w-full pl-3.5 pr-10 py-3 rounded-2xl border border-gray-200 bg-[#F7F4F6] text-base font-bold text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-(--primary-color)"
                 />
                 <span className="absolute right-3.5 top-3.5 text-xs font-bold text-gray-400">
                   cm
@@ -195,9 +195,9 @@ export default function Medidas() {
             <div className="flex items-center gap-2">
               <label
                 htmlFor="input-date"
-                className="flex items-center gap-1.5 text-xs font-semibold text-gray-600"
+                className="text-xs font-semibold text-gray-700 flex items-center gap-1.5"
               >
-                <Calendar className="w-3.5 h-3.5 text-[#F43F8E]" />
+                <Calendar className="w-3.5 h-3.5 text-(--primary-color)" />
                 <span>Data da Medição:</span>
               </label>
               <input
@@ -211,7 +211,7 @@ export default function Medidas() {
 
             <button
               type="submit"
-              className="px-8 py-3 bg-[#F43F8E] hover:bg-[#D63370] text-white font-bold text-sm rounded-2xl shadow-md shadow-[#F43F8E]/30 btn-tap-scale transition-all"
+              className="px-8 py-3 bg-(--primary-color) hover:bg-(--primary-hover) text-white font-bold text-sm rounded-2xl shadow-md shadow-(--primary-glow) btn-tap-scale transition-all"
             >
               Salvar Medidas
             </button>
@@ -220,13 +220,13 @@ export default function Medidas() {
           {errorMsg && <p className="text-xs text-red-600 font-semibold text-center">{errorMsg}</p>}
         </form>
 
-        {/* CARD ROSA-CLARO COM IMC CALCULADO EM TEMPO REAL + ESCALA OMS */}
-        <div className="p-5 sm:p-6 rounded-3xl bg-[#FCE4EC]/50 border border-[#F9A8C9]/40 space-y-4">
+        {/* CARD COM IMC CALCULADO EM TEMPO REAL + ESCALA OMS */}
+        <div className="p-5 sm:p-6 rounded-3xl bg-(--primary-subtle)/50 border border-(--primary-subtle-border) space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <span className="text-xs font-bold tracking-wide text-[#F43F8E] uppercase">
+              <span className="text-xs font-bold tracking-wide text-(--primary-color) uppercase">
                 Índice de Massa Corporal (OMS)
-              </span>
+              </span>{' '}
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-3xl sm:text-4xl font-black text-[#1F1A1D]">
                   {formatNumberBr(currentIMC, 1)}
@@ -278,7 +278,7 @@ export default function Medidas() {
           </div>
 
           <div className="flex items-center gap-2 text-[11px] text-[#6B7280]">
-            <Info className="w-3.5 h-3.5 text-[#F43F8E]" />
+            <Info className="w-3.5 h-3.5 text-(--primary-color)" />
             <span>
               A redução do IMC está diretamente associada à melhora dos marcadores
               cardiometabólicos.
@@ -295,9 +295,9 @@ export default function Medidas() {
           subtitle="Evolução do peso corporal ao longo das semanas de uso"
           data={weightChartData}
           unit="kg"
-          color="#F43F8E"
-          gradientFrom="#F43F8E"
-          gradientTo="#F9A8C9"
+          color="var(--primary-color)"
+          gradientFrom="var(--primary-color)"
+          gradientTo="var(--primary-light)"
         />
 
         {/* Gráfico 2: Evolução do IMC */}
@@ -306,9 +306,9 @@ export default function Medidas() {
           subtitle="Redução progressiva em direção à faixa de normalidade"
           data={imcChartData}
           unit="kg/m²"
-          color="#D63370"
-          gradientFrom="#D63370"
-          gradientTo="#FCE4EC"
+          color="var(--primary-hover)"
+          gradientFrom="var(--primary-hover)"
+          gradientTo="var(--primary-subtle)"
           referenceLines={[
             { y: 25.0, label: 'Meta Normal (24.9)', color: '#16A34A' },
             { y: 30.0, label: 'Limite Sobrepeso (29.9)', color: '#D97706' },
@@ -321,9 +321,9 @@ export default function Medidas() {
           subtitle="Acompanhamento da composição e perda de gordura"
           data={fatChartData}
           unit="%"
-          color="#FF6B9A"
-          gradientFrom="#FFB6C1"
-          gradientTo="#FFF5F7"
+          color="var(--primary-light)"
+          gradientFrom="var(--primary-light)"
+          gradientTo="var(--primary-subtle)"
         />
       </div>
 
@@ -333,7 +333,7 @@ export default function Medidas() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[#FCE4EC] text-[#6B7280]">
+              <tr className="border-b border-(--primary-subtle) text-[#6B7280]">
                 <th className="py-2.5 px-3 font-semibold">Data</th>
                 <th className="py-2.5 px-3 font-semibold">Peso</th>
                 <th className="py-2.5 px-3 font-semibold">IMC</th>
@@ -345,7 +345,7 @@ export default function Medidas() {
               {measurements.map((m) => (
                 <tr key={m.id} className="hover:bg-[#F7F4F6] transition-colors">
                   <td className="py-2.5 px-3 font-medium text-[#1F1A1D]">{formatDateBr(m.date)}</td>
-                  <td className="py-2.5 px-3 font-bold text-[#F43F8E]">
+                  <td className="py-2.5 px-3 font-bold text-(--primary-color)">
                     {formatNumberBr(m.weightKg, 1)} kg
                   </td>
                   <td className="py-2.5 px-3 font-semibold text-gray-800">

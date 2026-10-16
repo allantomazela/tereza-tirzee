@@ -40,6 +40,12 @@ export default {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
         },
+        'theme-main': 'var(--primary-color)',
+        'theme-hover': 'var(--primary-hover)',
+        'theme-light': 'var(--primary-light)',
+        'theme-subtle': 'var(--primary-subtle)',
+        'theme-subtle-border': 'var(--primary-subtle-border)',
+        'theme-glow': 'var(--primary-glow)',
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',

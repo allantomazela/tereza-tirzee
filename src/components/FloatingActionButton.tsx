@@ -11,7 +11,7 @@ interface FabAction {
 }
 
 const ACTIONS: FabAction[] = [
-  { label: 'Nova Dose', to: '/doses', icon: Syringe, color: 'bg-[#F43F8E]' },
+  { label: 'Nova Dose', to: '/doses', icon: Syringe, color: 'bg-(--primary-color)' },
   { label: 'Registrar Água', to: '/nutricao', icon: Droplets, color: 'bg-blue-500' },
   { label: 'Atualizar Peso', to: '/medidas', icon: Scale, color: 'bg-emerald-500' },
   { label: 'Nova Anotação', to: '/diario', icon: BookOpen, color: 'bg-amber-500' },
@@ -46,10 +46,10 @@ export default function FloatingActionButton() {
                 <button
                   key={action.to}
                   onClick={() => handleNavigate(action.to)}
-                  className="flex items-center gap-3 bg-white text-[#1F1A1D] px-3.5 py-2 rounded-2xl shadow-lg border border-[#FCE4EC] hover:bg-[#FCE4EC]/50 transition-all group btn-tap-scale"
+                  className="flex items-center gap-3 bg-white text-[#1F1A1D] px-3.5 py-2 rounded-2xl shadow-lg border border-(--primary-subtle) hover:bg-(--primary-subtle)/50 transition-all group btn-tap-scale"
                   style={{ animationDelay: `${idx * 40}ms` }}
                 >
-                  <span className="text-xs font-semibold tracking-wide text-gray-700 group-hover:text-[#F43F8E]">
+                  <span className="text-xs font-semibold tracking-wide text-gray-700 group-hover:text-(--primary-color)">
                     {action.label}
                   </span>
                   <div
@@ -66,13 +66,13 @@ export default function FloatingActionButton() {
           </div>
         )}
 
-        {/* Botão Central Rosa Choque */}
+        {/* Botão Central com cor dinâmica do tema */}
         <button
           type="button"
           onClick={() => setOpen(!open)}
           aria-label={open ? 'Fechar ações rápidas' : 'Ações rápidas'}
           className={cn(
-            'w-14 h-14 rounded-full bg-gradient-to-tr from-[#F43F8E] to-[#D63370] text-white flex items-center justify-center shadow-lg shadow-[#F43F8E]/40 hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-[#F9A8C9]',
+            'w-14 h-14 rounded-full bg-gradient-to-tr from-(--primary-color) to-(--primary-hover) text-white flex items-center justify-center shadow-lg shadow-(--primary-glow) hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-(--primary-light)',
             open && 'rotate-45',
           )}
         >
